@@ -1,11 +1,42 @@
 # CSE 506
 
-## Warmup Project 1: Part 1
+## Essentials
 
-   * Branch name: `w1p1`
-   * Clone: `git clone -b w1p1 git@github.com:emaadmanzoor/CSE506.git`
+**Clone a branch**
 
-# Team
+`git clone -b $BRANCHNAME git@github.com:emaadmanzoor/CSE506.git`
+
+**Setup and Pull from Ferdman's Code**
+
+```
+git remote add ferdman emanzoor@sbrocks.cewit.stonybrook.edu:/home/facfs1/mferdman/f15.git
+git pull ferdman $BRANCHNAME
+```
+
+**Setup and Pull from Our Code**
+
+```
+git remote add origin git@github.com:emaadmanzoor/CSE506.git
+git pull origin $BRANCHNAME
+```
+
+**Push to Our Code**
+
+`git push origin $BRANCHNAME`
+
+**Push to Ferdman's Code**
+
+You can't.
+
+## Projects
+
+### Warmup Project 1: Part 1
+
+Branch name: `w1p1`
+
+### Warmup Project 1: Part 2
+
+## Team
 
    * Emaad Ahmed Manzoor (emanzoor@cs.stonybrook.edu)
    * Rachee Singh (racsingh@cs.stonybrook.edu)
