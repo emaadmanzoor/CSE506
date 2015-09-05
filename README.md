@@ -32,7 +32,7 @@ You can't.
 
 ### Warmup Project 1: Part 1
 
-Branch name: `w1p1`
+**Branch name:** `w1p1`
 
 ### Warmup Project 1: Part 2
 
