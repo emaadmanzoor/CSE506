@@ -6,6 +6,15 @@
 
 `git clone -b $BRANCHNAME git@github.com:emaadmanzoor/CSE506.git`
 
+**Make Changes to Our Code**
+
+   * Checkout a new branch: `git checkout -b new-branch`
+   * Or go to an existing branch: `git checkout existing-branch`
+   * Check which branch you are on: `git status`
+   * Delete a branch: `git branch -d existing-branch`
+   * Make changes to the code.
+   * Push changes: `git push`
+
 **Setup and Pull from Ferdman's Code**
 
 ```
