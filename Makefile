@@ -8,11 +8,9 @@ AR=ar
 ROOTFS=rootfs
 ROOTBIN=$(ROOTFS)/bin
 ROOTLIB=$(ROOTFS)/lib
-ROOTBOOT=$(ROOTFS)/boot
 
 SHELL=/bin/sh
 
-KERN_SRCS:=$(shell find sys/ -name \*.c -o -name \*.s)
 LIBC_SRCS:=$(shell find libc/ -name \*.c -o -name \*.s)
 CRT_SRCS:=$(shell find crt/ -name \*.c -o -name \*.s)
 BIN_SRCS:=$(shell find bin/* -name \*.c)
@@ -21,26 +19,7 @@ BINS:=$(addprefix $(ROOTFS)/,$(wildcard bin/*))
 
 .PHONY: all binary
 
-all: $(USER).iso $(USER).img
-
-$(USER).iso: kernel
-	cp kernel $(ROOTBOOT)/kernel/kernel
-	mkisofs -r -no-emul-boot -input-charset utf-8 -b boot/cdboot -o $@ $(ROOTFS)/
-
-$(USER).img: newfs.506
-	qemu-img create -f raw $@ 16M
-	./newfs.506 $@
-
-newfs.506: $(wildcard newfs/*.c)
-	$(CC) -o $@ $^
-
-kernel: $(patsubst %.s,obj/%.asm.o,$(KERN_SRCS:%.c=obj/%.o)) obj/tarfs.o
-	$(LD) $(LDLAGS) -o $@ -T linker.script $^
-
-obj/tarfs.o: $(BINS)
-	tar --format=ustar -cvf tarfs --no-recursion -C $(ROOTFS) $(shell find $(ROOTFS)/ -name boot -prune -o ! -name .empty -printf "%P\n")
-	objcopy --input binary --binary-architecture i386 --output elf64-x86-64 tarfs $@
-	@rm tarfs
+all: $(BINS)
 
 $(ROOTLIB)/libc.a: $(patsubst %.s,obj/%.asm.o,$(LIBC_SRCS:%.c=obj/%.o))
 	$(AR) rcs $@ $^
@@ -64,7 +43,7 @@ obj/%.asm.o: %.s
 SUBMITTO:=~mferdman/cse506-submit/
 
 submit: clean
-	tar -czvf $(USER).tgz --exclude=.empty --exclude=.*.sw? --exclude=*~ LICENSE README Makefile linker.script sys bin crt libc newfs include $(ROOTFS) $(USER).img
+	tar -czvf $(USER).tgz --exclude=.empty --exclude=.*.sw? --exclude=*~ LICENSE README Makefile bin crt libc include $(ROOTFS)
 	@gpg --quiet --import cse506-pubkey.txt
 	gpg --yes --encrypt --recipient 'CSE506' $(USER).tgz
 	rm -fv $(SUBMITTO)$(USER)=*.tgz.gpg
@@ -72,4 +51,4 @@ submit: clean
 
 clean:
 	find $(ROOTLIB) $(ROOTBIN) -type f ! -name .empty -print -delete
-	rm -rfv obj kernel newfs.506 $(ROOTBOOT)/kernel/kernel $(USER).iso
+	rm -rfv obj
