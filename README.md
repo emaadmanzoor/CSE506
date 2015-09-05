@@ -38,5 +38,5 @@ You can't.
 
 ## Team
 
-   * Emaad Ahmed Manzoor (emanzoor@cs.stonybrook.edu)
    * Rachee Singh (racsingh@cs.stonybrook.edu)
+   * Emaad Ahmed Manzoor (emanzoor@cs.stonybrook.edu)
