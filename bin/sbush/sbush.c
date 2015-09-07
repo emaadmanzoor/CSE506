@@ -44,30 +44,35 @@ char** getargs( char* cmd, char* buf ) {
   int argnum = 1, count = 0, i;
   args = malloc( MAX_ARGS * sizeof( char* ) );
 
-  for( i=0; i<MAX_ARGS; i++) {
+  for( i = 0; i < MAX_ARGS; i++ ) {
     args[ i ] = malloc( MAX_ARG_LEN * sizeof( char ) );
   }
 
   args[ 0 ] = cmd;
+  for( i = 0; cmd[ i ] != '\0' ; i++ )
+    args[ 0 ][ i ] = cmd[ i ];
+  
   while( *buf == ' ' )
     buf++;
 
-  while( *buf!= '\0' ) {
+  while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
       argnum++;
       count = 0;
-      buf++;
     }
     args[ argnum ][ count ] = *buf;
     buf++;
     count++;
   }
+  for ( i = argnum + 1 ; i < MAX_ARGS; i++ )
+  args[ i ] = NULL;
+  
   return args;
 }
 
 int main() {
-  char buf[MAX_BUF_SIZE] = { 0 };
-  char cmd[MAX_CMD_LEN] = { 0 };
+  char buf[ MAX_BUF_SIZE ] = { 0 };
+  char cmd[ MAX_CMD_LEN ] = { 0 };
   char** args;
   int argindex, pid;
   int i, status;
@@ -76,12 +81,19 @@ int main() {
     printf( "\nsbush>" );
     gets( buf );
     argindex = getcmd( buf, cmd );
+
+    /*
+     * User entered empty string, move on
+     */
+    if( argindex == 0 )
+      continue;
     
     args = getargs( cmd, &buf[ argindex ] );
 
     pid = fork();
     if ( pid == 0 ) {
       // printf( "In child..\n" );
+      // TODO: EXEC functionaily
       status = execve( cmd, args, NULL );
       printf( "Exec failed! Returned status %d\n", status );
       exit( status );
@@ -93,9 +105,12 @@ int main() {
       printf( "FORK ERROR, EXITING..\n" );
       exit( 1 );
     }
-    // Trying not to use memset so resetting the buffer manually
-    for ( i=0; i<MAX_BUF_SIZE; i++ )
+    // Trying not to use memset so resetting the buffer and cmd manually
+    for ( i = 0; i< MAX_BUF_SIZE; i++ )
       buf[ i ] = 0;
+    for ( i = 0; i < MAX_CMD_LEN; i++ )
+      cmd[ i ] = 0;
+
   }
   return 0;
 }
