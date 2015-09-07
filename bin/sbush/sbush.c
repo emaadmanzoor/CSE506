@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include "sbush.h"
 
 #define MAX_BUF_SIZE 200
 #define MAX_CMD_LEN 50
@@ -11,6 +13,10 @@
 #define MAX_ARGS 5 + 2
 #define MAX_ARG_LEN 30
 #define MAX_ENV_VARS 2
+
+// environment variable init
+char *path = NULL;
+char *ps1 = NULL;
 
 /*
  * getcmd takes unprocessed user input (buf) and puts the command in the
@@ -75,7 +81,6 @@ char** getargs( char* cmd, char* buf ) {
 
   while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
-      printf( "found a spce\n" );
       argnum++;
       count = 0;
       buf++;
@@ -117,6 +122,20 @@ int main() {
     for ( i = 0; args[ i ] != NULL; i++ )
       printf( "ARGS %d: %s\n", i, args[ i ] );
 
+    // handle builtins: setenv, cd, exit
+    if (strcmp(cmd, "setenv") == 0) {
+        setenv(args);
+        continue;
+    } else if (strcmp(cmd, "getenv") == 0) {
+        getenv(args);
+        continue;
+    } else if (strcmp(cmd, "cd") == 0) {
+        continue;
+    } else if (strcmp(cmd, "exit") == 0) {
+        break;
+    }
+
+    // handle executables
     pid = fork();
     if ( pid == 0 ) {
       // printf( "In child..\n" );
@@ -129,7 +148,7 @@ int main() {
       // printf( "Child Exited\n" );
     } else {
       printf( "FORK ERROR, EXITING..\n" );
-      exit( 1 );
+      break;
     }
     // Trying not to use memset so resetting the buffer and cmd manually
     for ( i = 0; i< MAX_BUF_SIZE; i++ )
@@ -138,5 +157,9 @@ int main() {
       cmd[ i ] = 0;
 
   }
+
+  printf("Exiting sbush.\n");
+  free(path);
+  free(ps1);
   return 0;
 }
