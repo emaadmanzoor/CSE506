@@ -123,6 +123,12 @@ int main() {
   int background = 0;
 
   while ( 1 ) {
+    // initialise command/arg data structures
+    for ( i = 0; i< MAX_BUF_SIZE; i++ )
+      buf[ i ] = 0;
+    for ( i = 0; i < MAX_CMD_LEN; i++ )
+      cmd[ i ] = 0;
+
     printf( "\nsbush>" );
     gets( buf );
     
@@ -198,12 +204,6 @@ int main() {
       printf( "Shell procreation failed\n" );
       break;
     }
-    
-    // HACK: Trying not to use memset so resetting the buffer and cmd manually
-    for ( i = 0; i< MAX_BUF_SIZE; i++ )
-      buf[ i ] = 0;
-    for ( i = 0; i < MAX_CMD_LEN; i++ )
-      cmd[ i ] = 0;
 
     for( i = 0; args[ i ] != NULL; i++ )
       free( args[ i ] );
