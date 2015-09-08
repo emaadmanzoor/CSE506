@@ -15,7 +15,7 @@ void setenv(char *args[]) {
     }
 
     int len = strlen(args[2]);
-    char *value = malloc(sizeof(char) * len);
+    char *value = malloc(sizeof(char) * (len + 1));
     strcpy(value, args[2]);
 
     if (strcmp(args[1], "PATH") == 0) {
