@@ -47,57 +47,69 @@ int getcmd( char* buf, char* cmd ) {
  * user entered command, followed by arguments and NULL.
 */
 int countargs( char* buf ) {
-  int i, count = 0;
+  int i, count = 1;
+
+  if( buf[ 0 ] == '\0' )
+    return 0;
+  
   for( i = 0; buf[ i ] != '\0'; i++ ) {
     if( buf[ i ] == ' ' )
       count++;
   }
-  return count + 3;
+  return count;
 }
 
 /*
-getargs takes off from getcmd finished. It looks at buf from the index
+getargs takes off from where getcmd finished. It looks at buf from the index
 returned by getcmd. So, getargs looks only at userargs and returns
 an array of strings containing arguments to the command entered by the user.
 The cmd is the first element of the args array which is NULL terminated.
 */
 char** getargs( char* cmd, char* buf ) {
   char** args;
-  int argnum = 1, count = 0, i, num_args;
-
-  num_args = countargs( buf );
-  
-  args = malloc( num_args * sizeof( char* ) );
-
-  for( i = 0; i < num_args; i++ ) {
-    args[ i ] = malloc( MAX_ARG_LEN * sizeof( char ) );
-  }
-
-  args[ 0 ] = cmd;
+  int argnum = 1, count = 0, num_args;
+  int argc;
+  char temptoken[ 30 ];
 
   // Remove trailing spaces
   while( *buf == ' ' )
     buf++;
 
+  num_args = countargs( buf );
+  // 2 extra strings, one for the command and one for the NULL
+  argc = num_args + 2;
+  args = malloc( argc * sizeof( char* ) );
+
+  args[ argc - 1 ] = NULL;
+  args[ 0 ] = malloc( ( strlen( cmd ) + 1 )* sizeof( char ) );
+  strcpy( args[ 0 ], cmd );
+
+  /*
+   * temptoken is the temporary buffer used to inhale a user entered
+   * argument which is then used to malloc the right size of memory
+   * in argv. After each argument is inhaled, temptoken is null terminated
+   * so as to copy all its contents into argv[ argnum ].
+   */
   while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
+      temptoken[ count ] = '\0';
+      args[ argnum ] = malloc( ( count + 1 ) * sizeof( char ) );
+      strcpy( args[ argnum ], temptoken );
       argnum++;
       count = 0;
       buf++;
       continue;
     }
-    args[ argnum ][ count ] = *buf;
+    temptoken[ count ] = *buf;
     buf++;
     count++;
   }
-
+  
   if( count > 0 ) {
-    // We found non zero arguments to cmd, set everything after that arg to NUL
-    argnum++;
+      temptoken[ count ] = '\0';
+      args[ argnum ] = malloc( ( count + 1 ) * sizeof( char ) );
+      strcpy( args[ argnum ], temptoken );
   }
-
-  for ( i = argnum ; i < num_args; i++ )
-    args[ i ] = NULL;
 
   return args;
 }
@@ -106,23 +118,41 @@ int main() {
   char buf[ MAX_BUF_SIZE ] = { 0 };
   char cmd[ MAX_CMD_LEN ] = { 0 };
   char** args;
-  int argindex, pid;
-  int i, status;
+  int argindex, pid, bgpid;
+  int i, status, buflen;
+  int background = 0;
 
   while ( 1 ) {
     printf( "\nsbush>" );
     gets( buf );
+    
+    if( buf[ 0 ] == 0 )
+      continue;
+    
+    buflen = strlen( buf );
+    /*
+     * Check if the cmd needs to be run in the background
+     */
+    if( buf[ buflen - 1 ] == '&' ) {
+      background = 1;
+      /*
+       * This was a space, making it null to terminate the string earlier
+       */
+      buf [ buflen - 2 ] = '\0';
+    }    
     argindex = getcmd( buf, cmd );
 
     if( argindex == 0 )
       continue;
 
     args = getargs( cmd, &buf[ argindex ] );
-    printf( "Command: %s\n", cmd );
-    for ( i = 0; args[ i ] != NULL; i++ )
-      printf( "ARGS %d: %s\n", i, args[ i ] );
+    // printf( "Command: %s\n", cmd );
+    // for ( i = 0; args[ i ] != NULL; i++ )
+    // printf( "ARGS %d: %s\n", i, args[ i ] );
 
-    // handle builtins: setenv, cd, exit
+    /*
+     * handle builtins: setenv, cd, exit
+     */
     if (strcmp(cmd, "setenv") == 0) {
         setenv(args);
         continue;
@@ -136,31 +166,50 @@ int main() {
         break;
     }
 
-    // handle executables
+    /*
+     * handle executables
+     */
     pid = fork();
     if ( pid == 0 ) {
-      // printf( "In child..\n" );
-      status = execve( cmd, args, NULL );
-      printf( "Exec failed! Returned status %d\n", status );
-      exit( status );
+      	/*
+	 * In the child, if background command to be run
+	 * fork another child and execve in the child.
+	 */
+      if( background ) {
+	bgpid = fork();
+	if( bgpid < 0 ) {
+	  printf( "Fork Failed" );
+	} else if( bgpid == 0 ) {
+	  status = execve( cmd, args, NULL );
+	  printf( "Exec failed! Returned status %d\n", status );
+	}
+      } else {
+	status = execve( cmd, args, NULL );
+	printf( "Exec failed! Returned status %d\n", status );
+      }
+      exit( 0 );
     } else if ( pid > 0 ) {
       // printf( "In parent..\n" );
       waitpid( pid, 0, 0 );
       // printf( "Child Exited\n" );
     } else {
-      printf( "FORK ERROR, EXITING..\n" );
+      printf( "Fork Failed" );
       break;
     }
-    // Trying not to use memset so resetting the buffer and cmd manually
+    
+    // HACK: Trying not to use memset so resetting the buffer and cmd manually
     for ( i = 0; i< MAX_BUF_SIZE; i++ )
       buf[ i ] = 0;
     for ( i = 0; i < MAX_CMD_LEN; i++ )
       cmd[ i ] = 0;
 
+    for( i = 0; args[ i ] != NULL; i++ )
+      free( args[ i ] );
+    free( args );
   }
 
-  printf("Exiting sbush.\n");
-  free(path);
-  free(ps1);
+  printf( "Exiting sbush.\n" );
+  free( path );
+  free( ps1 );
   return 0;
 }
