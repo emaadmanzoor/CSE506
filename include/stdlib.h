@@ -4,6 +4,7 @@
 #include <sys/defs.h>
 
 extern __thread int errno;
+extern char **environ;
 
 void exit(int status);
 

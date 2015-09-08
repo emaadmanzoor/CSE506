@@ -15,15 +15,24 @@ BIN_SRCS:=$(shell find bin/* -name \*.c)
 INCLUDES:=$(shell find include/ -type f -name \*.h)
 BINS:=$(addprefix $(ROOTFS)/,$(wildcard bin/*))
 
+SRC_DIR = src
+OBJ_DIR = obj
+LIB_SRCS:=$(wildcard $(SRC_DIR)/*.c)
+LIB_OBJS:=$(LIB_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+
 .PHONY: all binary
 
 all: $(BINS)
 
-$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(BIN_SRCS) $(INCLUDES)
+$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(BIN_SRCS) $(INCLUDES) $(LIB_OBJS)
 	@$(MAKE) --no-print-directory BIN=$@ binary
 
-binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c))
+binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c)) $(LIB_OBJS)
 	$(LD) $(LDLAGS) -o $(BIN) $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $^
+
+$(LIB_OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 obj/%.o: %.c $(INCLUDES)
 	@mkdir -p $(dir $@)
