@@ -146,9 +146,9 @@ int main() {
       continue;
 
     args = getargs( cmd, &buf[ argindex ] );
-    printf( "Command: %s\n", cmd );
-    for ( i = 0; args[ i ] != NULL; i++ )
-    printf( "ARGS %d: %s\n", i, args[ i ] );
+    // printf( "Command: %s\n", cmd );
+    // for ( i = 0; args[ i ] != NULL; i++ )
+    // printf( "ARGS %d: %s\n", i, args[ i ] );
 
     /*
      * handle builtins: setenv, cd, exit
