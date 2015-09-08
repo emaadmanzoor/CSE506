@@ -3,10 +3,6 @@
 #include <string.h>
 #include "sbush.h"
 
-#define MAX_BUF_SIZE 200
-#define MAX_CMD_LEN 50
-#define MAX_ENV_VARS 2
-
 // environment variable init
 char *path = NULL;
 char *ps1 = NULL;
@@ -115,6 +111,12 @@ int main() {
   int i, buflen;
   int background = 0;
 
+  // default PATH and PS1
+  path = (char *) malloc(sizeof(char) * strlen(DEFAULT_PATH));
+  strcpy(path, DEFAULT_PATH);
+  ps1 = (char *) malloc(sizeof(char) * strlen(DEFAULT_PS1));
+  strcpy(ps1, DEFAULT_PS1);
+
   while ( 1 ) {
     // initialise command/arg data structures
     for ( i = 0; i< MAX_BUF_SIZE; i++ )
@@ -122,9 +124,11 @@ int main() {
     for ( i = 0; i < MAX_CMD_LEN; i++ )
       cmd[ i ] = 0;
 
-    printf( "\nsbush>" );
+    // prompt
+    printf(ps1);
+    printf(">");
+
     gets( buf );
-    
     if( buf[ 0 ] == 0 )
       continue;
     
@@ -150,7 +154,7 @@ int main() {
     // printf( "ARGS %d: %s\n", i, args[ i ] );
 
     /*
-     * handle builtins: setenv, cd, exit
+     * handle builtins: setenv, cd, clear, exit
      */
     if (strcmp(cmd, "setenv") == 0) {
       setenv(args);
@@ -160,6 +164,9 @@ int main() {
       continue;
     } else if (strcmp(cmd, "cd") == 0) {
       cd(args);
+      continue;
+    } else if (strcmp(cmd, "clear") == 0) {
+      clear();
       continue;
     } else if (strcmp(cmd, "exit") == 0) {
       break;
