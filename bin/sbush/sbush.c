@@ -84,6 +84,12 @@ char** getargs( char* cmd, char* buf ) {
   args[ 0 ] = malloc( ( strlen( cmd ) + 1 )* sizeof( char ) );
   strcpy( args[ 0 ], cmd );
 
+  /*
+   * temptoken is the temporary buffer used to inhale a user entered
+   * argument which is then used to malloc the right size of memory
+   * in argv. After each argument is inhaled, temptoken is null terminated
+   * so as to copy all its contents into argv[ argnum ].
+   */
   while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
       temptoken[ count ] = '\0';
@@ -114,16 +120,24 @@ int main() {
   char** args;
   int argindex, pid, bgpid;
   int i, status, buflen;
-  int BACKGRND = 0;
+  int background = 0;
 
   while ( 1 ) {
     printf( "\nsbush>" );
     gets( buf );
+    
+    if( buf[ 0 ] == 0 )
+      continue;
+    
     buflen = strlen( buf );
+    /*
+     * Check if the cmd needs to be run in the background
+     */
     if( buf[ buflen - 1 ] == '&' ) {
-      BACKGRND = 1;
-      buf [ buflen - 1 ] = '\0';
-      // This was a space, making it null as well
+      background = 1;
+      /*
+       * This was a space, making it null to terminate the string earlier
+       */
       buf [ buflen - 2 ] = '\0';
     }    
     argindex = getcmd( buf, cmd );
@@ -132,11 +146,13 @@ int main() {
       continue;
 
     args = getargs( cmd, &buf[ argindex ] );
-    // printf( "Command: %s\n", cmd );
-    //for ( i = 0; args[ i ] != NULL; i++ )
-    //printf( "ARGS %d: %s\n", i, args[ i ] );
+    printf( "Command: %s\n", cmd );
+    for ( i = 0; args[ i ] != NULL; i++ )
+    printf( "ARGS %d: %s\n", i, args[ i ] );
 
-    // handle builtins: setenv, cd, exit
+    /*
+     * handle builtins: setenv, cd, exit
+     */
     if (strcmp(cmd, "setenv") == 0) {
         setenv(args);
         continue;
@@ -150,10 +166,16 @@ int main() {
         break;
     }
 
-    // handle executables
+    /*
+     * handle executables
+     */
     pid = fork();
     if ( pid == 0 ) {
-      if( BACKGRND ) {
+      	/*
+	 * In the child, if background command to be run
+	 * fork another child and execve in the child.
+	 */
+      if( background ) {
 	bgpid = fork();
 	if( bgpid < 0 ) {
 	  printf( "Fork Failed" );
