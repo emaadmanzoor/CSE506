@@ -7,8 +7,8 @@ void usage_cd() {
     printf("\tUsage: cd <PATH>\n");
 }
 
-void cd(char *args[]) {
-    if (args[1] == NULL) {
+void cd(char *const args[], int argc) {
+    if (argc != 2) {
         usage_cd();
         return;
     }

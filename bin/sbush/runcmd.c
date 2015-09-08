@@ -5,7 +5,7 @@
 
 // runs the executable by searching for it
 // on the path, returning -1 on failure.
-void runcmd(const char* cmd, char *const args[]) {
+void runcmd(const char* cmd, char *const args[], int argc) {
   int status;
   int i, path_len, current_path_idx;
   char *search_path;

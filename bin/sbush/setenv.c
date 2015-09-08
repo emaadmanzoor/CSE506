@@ -8,8 +8,8 @@ void usage_setenv() {
     printf("\tUsage: setenv PATH|PS1 <VALUE>\n");
 }
 
-void setenv(char *args[]) {
-    if (args[1] == NULL || args[2] == NULL) {
+void setenv(char *const args[], int argc) {
+    if (argc != 3) {
         usage_setenv();
         return;
     }
