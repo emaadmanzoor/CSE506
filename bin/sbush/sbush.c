@@ -5,13 +5,6 @@
 
 #define MAX_BUF_SIZE 200
 #define MAX_CMD_LEN 50
-
-/*
- * 5 is the actual number of arguments. Adding one for the NULL termination
- * and one for the command itself.
- */
-#define MAX_ARGS 5 + 2
-#define MAX_ARG_LEN 30
 #define MAX_ENV_VARS 2
 
 // environment variable init
