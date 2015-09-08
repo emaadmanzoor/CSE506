@@ -54,20 +54,33 @@ returned by getcmd. So, getargs looks only at userargs and returns
 an array of strings containing arguments to the command entered by the user.
 The cmd is the first element of the args array which is NULL terminated.
 */
-char** getargs( char* cmd, char* buf ) {
+char** getargs( char* cmd, char* buf, int *nargs ) {
   char** args;
   int argnum = 1, count = 0, num_args;
   int argc;
   char temptoken[ 30 ];
+  char *buf_end;
+  int buflen;
 
-  // Remove trailing spaces
+  // strip trailing spaces
   while( *buf == ' ' )
     buf++;
+
+  // strip leading spaces
+  buflen = strlen(buf);
+  buf_end = buf + buflen - 1;
+  while (*buf_end == ' ') {
+    *buf_end = '\0';
+    buf_end--;
+  }
 
   num_args = countargs( buf );
   // 2 extra strings, one for the command and one for the NULL
   argc = num_args + 2;
   args = malloc( argc * sizeof( char* ) );
+
+  // to return for other programs
+  *nargs = num_args + 1;
 
   args[ argc - 1 ] = NULL;
   args[ 0 ] = malloc( ( strlen( cmd ) + 1 )* sizeof( char ) );
@@ -107,14 +120,15 @@ int main() {
   char buf[ MAX_BUF_SIZE ] = { 0 };
   char cmd[ MAX_CMD_LEN ] = { 0 };
   char** args;
+  int argc;
   int argindex, pid, bgpid;
   int i, buflen;
   int background = 0;
 
   // default PATH and PS1
-  path = (char *) malloc(sizeof(char) * strlen(DEFAULT_PATH));
+  path = (char *) malloc(sizeof(char) * strlen(DEFAULT_PATH) + 1);
   strcpy(path, DEFAULT_PATH);
-  ps1 = (char *) malloc(sizeof(char) * strlen(DEFAULT_PS1));
+  ps1 = (char *) malloc(sizeof(char) * strlen(DEFAULT_PS1) + 1);
   strcpy(ps1, DEFAULT_PS1);
 
   while ( 1 ) {
@@ -131,7 +145,7 @@ int main() {
     gets( buf );
     if( buf[ 0 ] == 0 )
       continue;
-    
+
     buflen = strlen( buf );
     /*
      * Check if the cmd needs to be run in the background
@@ -148,22 +162,23 @@ int main() {
     if( argindex == 0 )
       continue;
 
-    args = getargs( cmd, &buf[ argindex ] );
-    // printf( "Command: %s\n", cmd );
-    // for ( i = 0; args[ i ] != NULL; i++ )
-    // printf( "ARGS %d: %s\n", i, args[ i ] );
+    args = getargs( cmd, &buf[ argindex ], &argc );
+
+    //printf( "Command: %s\n", cmd );
+    //for ( i = 0; args[ i ] != NULL; i++ )
+    //  printf( "ARGS %d: %s\n", i, args[ i ] );
 
     /*
      * handle builtins: setenv, cd, clear, exit
      */
     if (strcmp(cmd, "setenv") == 0) {
-      setenv(args);
+      setenv(args, argc);
       continue;
     } else if (strcmp(cmd, "getenv") == 0) {
-      getenv(args);
+      getenv(args, argc);
       continue;
     } else if (strcmp(cmd, "cd") == 0) {
-      cd(args);
+      cd(args, argc);
       continue;
     } else if (strcmp(cmd, "clear") == 0) {
       clear();
@@ -184,19 +199,20 @@ int main() {
       if( background ) {
         // running as a background command: &
         bgpid = fork();
-        if( bgpid < 0 ) {
+        if( bgpid == 0 ) {
+          // child
+          runcmd(cmd, args, argc);
+        } else if ( bgpid > 0) {
+          // parent
+        } else {
           printf( "Failed to spawn a background process\n" );
-        } else if( bgpid == 0 ) {
-          runcmd(cmd, args);
         }
       } else {
         // running as a foreground command
-        runcmd(cmd, args);
+        runcmd(cmd, args, argc);
       }
-      /*
-       * still in the child, so exit without fear of memleak
-       */
-      exit( 0 );
+      // child should exit now
+      goto cleanup;
     } else if ( pid > 0 ) {
       // in the parent
       waitpid( pid, 0, 0 );
@@ -211,6 +227,8 @@ int main() {
   }
 
   printf( "Exiting sbush.\n" );
+
+cleanup:
   free( path );
   free( ps1 );
   for( i = 0; args[ i ] != NULL; i++ )

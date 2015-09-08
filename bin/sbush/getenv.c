@@ -8,8 +8,8 @@ void usage_getenv() {
     printf("\tUsage: getenv PATH|PS1\n");
 }
 
-void getenv(char *args[]) {
-    if (args[1] == NULL) {
+void getenv(char *const args[], int argc) {
+    if (argc != 2) {
         usage_getenv();
         return;
     }
