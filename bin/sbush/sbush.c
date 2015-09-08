@@ -86,11 +86,7 @@ char** getargs( char* cmd, char* buf ) {
   }
 
   args[ argc - 1 ] = NULL;
-  
-  //for( i = 0; cmd[ i ] != '\0'; i++ )
-  //args[ 0 ][ i ] = cmd[ i ];
-  
-  args[ 0 ][ i + 1 ] = '\0';
+  strcpy( args[ 0 ], cmd );
 
   while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
