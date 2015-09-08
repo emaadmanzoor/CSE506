@@ -7,7 +7,6 @@ AR=ar
 
 ROOTFS=rootfs
 ROOTBIN=$(ROOTFS)/bin
-ROOTBOOT=$(ROOTFS)/boot
 
 SHELL=/bin/sh
 
@@ -55,4 +54,4 @@ submit: clean
 
 clean:
 	find $(ROOTBIN) -type f ! -name .empty -print -delete
-	rm -rfv obj kernel newfs.506 $(ROOTBOOT)/kernel/kernel $(USER).iso
+	rm -rfv obj
