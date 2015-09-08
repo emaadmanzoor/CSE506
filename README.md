@@ -45,6 +45,12 @@ You can't.
 
 ### Warmup Project 1: Part 2
 
+## Useful Commands
+
+```
+valgrind rootfs/bin/sbush --track-origins=yes --leak-check=full -v
+```
+
 ## Team
 
    * Rachee Singh (racsingh@cs.stonybrook.edu)

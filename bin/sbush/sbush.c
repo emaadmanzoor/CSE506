@@ -154,16 +154,16 @@ int main() {
      * handle builtins: setenv, cd, exit
      */
     if (strcmp(cmd, "setenv") == 0) {
-        setenv(args);
-        continue;
+      setenv(args);
+      continue;
     } else if (strcmp(cmd, "getenv") == 0) {
-        getenv(args);
-        continue;
+      getenv(args);
+      continue;
     } else if (strcmp(cmd, "cd") == 0) {
-        cd(args);
-        continue;
+      cd(args);
+      continue;
     } else if (strcmp(cmd, "exit") == 0) {
-        break;
+      break;
     }
 
     /*
@@ -171,29 +171,31 @@ int main() {
      */
     pid = fork();
     if ( pid == 0 ) {
-      	/*
-	 * In the child, if background command to be run
-	 * fork another child and execve in the child.
-	 */
+      /*
+       * In the child, if background command to be run
+       * fork another child and execve in the child.
+       */
       if( background ) {
-	bgpid = fork();
-	if( bgpid < 0 ) {
-	  printf( "Fork Failed" );
-	} else if( bgpid == 0 ) {
-	  status = execve( cmd, args, NULL );
-	  printf( "Exec failed! Returned status %d\n", status );
-	}
+        // running as a background command: &
+        bgpid = fork();
+        if( bgpid < 0 ) {
+          printf( "Failed to spawn a background process\n" );
+        } else if( bgpid == 0 ) {
+          status = execve( cmd, args, NULL );
+          printf( "Bad command or filename: %d\n", status );
+        }
       } else {
-	status = execve( cmd, args, NULL );
-	printf( "Exec failed! Returned status %d\n", status );
+        // running as a foreground command
+        status = execve( cmd, args, NULL );
+        printf( "Bad command or filename: %d\n", status );
       }
+      // still in the child so exit
       exit( 0 );
     } else if ( pid > 0 ) {
-      // printf( "In parent..\n" );
+      // in the parent
       waitpid( pid, 0, 0 );
-      // printf( "Child Exited\n" );
     } else {
-      printf( "Fork Failed" );
+      printf( "Shell procreation failed\n" );
       break;
     }
     
