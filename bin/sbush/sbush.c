@@ -119,7 +119,7 @@ int main() {
   char cmd[ MAX_CMD_LEN ] = { 0 };
   char** args;
   int argindex, pid, bgpid;
-  int i, status, buflen;
+  int i, buflen;
   int background = 0;
 
   while ( 1 ) {
@@ -173,7 +173,7 @@ int main() {
     if ( pid == 0 ) {
       /*
        * In the child, if background command to be run
-       * fork another child and execve in the child.
+       * fork another child and run the command in it.
        */
       if( background ) {
         // running as a background command: &
@@ -181,13 +181,11 @@ int main() {
         if( bgpid < 0 ) {
           printf( "Failed to spawn a background process\n" );
         } else if( bgpid == 0 ) {
-          status = execve( cmd, args, NULL );
-          printf( "Bad command or filename: %d\n", status );
+          runcmd(cmd, args);
         }
       } else {
         // running as a foreground command
-        status = execve( cmd, args, NULL );
-        printf( "Bad command or filename: %d\n", status );
+        runcmd(cmd, args);
       }
       // still in the child so exit
       exit( 0 );
