@@ -9,4 +9,5 @@ int main() {
     test_strcmp();
     test_strlen();
     test_strcpy();
+    test_strncpy();
 }
