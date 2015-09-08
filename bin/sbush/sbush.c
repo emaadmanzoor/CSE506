@@ -47,12 +47,16 @@ int getcmd( char* buf, char* cmd ) {
  * user entered command, followed by arguments and NULL.
 */
 int countargs( char* buf ) {
-  int i, count = 0;
+  int i, count = 1;
+
+  if( buf[ 0 ] == '\0' )
+    return 0;
+  
   for( i = 0; buf[ i ] != '\0'; i++ ) {
     if( buf[ i ] == ' ' )
       count++;
   }
-  return count + 3;
+  return count;
 }
 
 /*
@@ -64,23 +68,33 @@ The cmd is the first element of the args array which is NULL terminated.
 char** getargs( char* cmd, char* buf ) {
   char** args;
   int argnum = 1, count = 0, i, num_args;
-
-  num_args = countargs( buf );
-  
-  args = malloc( num_args * sizeof( char* ) );
-
-  for( i = 0; i < num_args; i++ ) {
-    args[ i ] = malloc( MAX_ARG_LEN * sizeof( char ) );
-  }
-
-  args[ 0 ] = cmd;
+  int argc;
 
   // Remove trailing spaces
   while( *buf == ' ' )
     buf++;
 
+  num_args = countargs( buf );
+  printf( "num args %d", num_args );
+  argc = num_args + 2;
+  
+  // extra 2 strings, one for the command and one for the NULL
+  args = malloc( argc * sizeof( char* ) );
+
+  for( i = 0; i < argc - 1; i++ ) {
+    args[ i ] = malloc( MAX_ARG_LEN * sizeof( char ) );
+  }
+
+  args[ argc - 1 ] = NULL;
+  
+  //for( i = 0; cmd[ i ] != '\0'; i++ )
+  //args[ 0 ][ i ] = cmd[ i ];
+  
+  args[ 0 ][ i + 1 ] = '\0';
+
   while( *buf != '\0' ) {
     if ( *buf == ' ' ) {
+      args[ argnum ][ count ] = '\0';
       argnum++;
       count = 0;
       buf++;
@@ -90,14 +104,6 @@ char** getargs( char* cmd, char* buf ) {
     buf++;
     count++;
   }
-
-  if( count > 0 ) {
-    // We found non zero arguments to cmd, set everything after that arg to NUL
-    argnum++;
-  }
-
-  for ( i = argnum ; i < num_args; i++ )
-    args[ i ] = NULL;
 
   return args;
 }
@@ -156,6 +162,9 @@ int main() {
     for ( i = 0; i < MAX_CMD_LEN; i++ )
       cmd[ i ] = 0;
 
+    for( i = 0; args[ i ] != NULL; i++ )
+      free( args[ i ] );
+    free( args );
   }
 
   printf("Exiting sbush.\n");
