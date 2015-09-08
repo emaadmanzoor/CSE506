@@ -187,7 +187,9 @@ int main() {
         // running as a foreground command
         runcmd(cmd, args);
       }
-      // still in the child so exit
+      /*
+       * still in the child, so exit without fear of memleak
+       */
       exit( 0 );
     } else if ( pid > 0 ) {
       // in the parent
@@ -211,5 +213,9 @@ int main() {
   printf( "Exiting sbush.\n" );
   free( path );
   free( ps1 );
+  for( i = 0; args[ i ] != NULL; i++ )
+    free( args[ i ] );
+  free( args );
+
   return 0;
 }
