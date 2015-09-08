@@ -130,6 +130,7 @@ int main() {
         getenv(args);
         continue;
     } else if (strcmp(cmd, "cd") == 0) {
+        cd(args);
         continue;
     } else if (strcmp(cmd, "exit") == 0) {
         break;
