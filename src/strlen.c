@@ -1,6 +1,6 @@
 #include <string.h>
 
-/* 
+/*
  * Returns the length of the passed string
  *
  * NOTE: The parameters are const to protect (compile-time)

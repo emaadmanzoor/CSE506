@@ -40,7 +40,7 @@ int countargs( char* buf ) {
 
   if( buf[ 0 ] == '\0' )
     return 0;
-  
+
   for( i = 0; buf[ i ] != '\0'; i++ ) {
     if( buf[ i ] == ' ' )
       count++;
@@ -106,7 +106,7 @@ char** getargs( char* cmd, char* buf, int *nargs ) {
     buf++;
     count++;
   }
-  
+
   if( count > 0 ) {
       temptoken[ count ] = '\0';
       args[ argnum ] = malloc( ( count + 1 ) * sizeof( char ) );
@@ -156,7 +156,7 @@ int main() {
        * This was a space, making it null to terminate the string earlier
        */
       buf [ buflen - 2 ] = '\0';
-    }    
+    }
     argindex = getcmd( buf, cmd );
 
     if( argindex == 0 )

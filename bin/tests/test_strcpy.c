@@ -4,7 +4,7 @@
 
 void test_strcpy() {
   printf("strcpy tests start.\n");
-  
+
   char *dest = (char *) malloc(sizeof(char) * 5);
   dest[4] = 'E'; // should be overwritten by null
   strcpy(dest, "abcd");

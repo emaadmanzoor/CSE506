@@ -61,7 +61,7 @@ void runcmd(const char* cmd, char *const args[], int argc) {
     current_search_path = search_path + current_path_idx;
   }
 
-  // failure 
+  // failure
   free(search_path);
   printf("Bad command or filename: %d\n", status);
 }

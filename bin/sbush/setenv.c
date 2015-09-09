@@ -21,7 +21,7 @@ void setenv(char *const args[], int argc) {
     if (strcmp(args[1], "PATH") == 0) {
        if (path != NULL)
            free(path);
-       path = value; 
+       path = value;
     } else if (strcmp(args[1], "PS1") == 0) {
        if (ps1 != NULL)
            free(ps1);

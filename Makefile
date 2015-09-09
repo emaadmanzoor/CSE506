@@ -1,8 +1,8 @@
 CC=gcc
 AS=as
 CFLAGS=-O1 -std=c99 -D__thread= -Wall -Werror -nostdinc -Iinclude -msoft-float -mno-sse -mno-red-zone -fno-builtin -fPIC -march=amdfam10 -g3
-LD=gcc
-LDLAGS=
+LD=ld
+LDLAGS=-nostdlib
 AR=ar
 
 ROOTFS=rootfs
@@ -22,13 +22,18 @@ OBJ_DIR = obj
 LIB_SRCS:=$(wildcard $(SRC_DIR)/*.c)
 LIB_OBJS:=$(LIB_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 
+.PHONY: all binary
+
 all: $(BINS)
 
-$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(BIN_SRCS) $(INCLUDES) $(LIB_OBJS)
+$(ROOTLIB)/libc.a: $(patsubst %.s,obj/%.asm.o,$(LIBC_SRCS:%.c=obj/%.o))
+	$(AR) rcs $@ $^
+
+$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(ROOTLIB)/libc.a $(BIN_SRCS) $(INCLUDES) $(LIB_OBJS)
 	@$(MAKE) --no-print-directory BIN=$@ binary
 
 binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c)) $(LIB_OBJS)
-	$(LD) $(LDLAGS) -o $(BIN) $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $^
+	$(LD) $(LDLAGS) -o $(BIN) $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $^ $(ROOTLIB)/libc.a
 
 $(LIB_OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)

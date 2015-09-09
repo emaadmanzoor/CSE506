@@ -1,6 +1,6 @@
 #include <string.h>
 
-/* 
+/*
  * Compares 2 strings
  * Returns:
  *      0 if equal
