@@ -184,6 +184,7 @@ int main() {
       clear();
       continue;
     } else if (strcmp(cmd, "exit") == 0) {
+      printf( "Exiting sbush.\n" );
       break;
     }
 
@@ -212,7 +213,7 @@ int main() {
         runcmd(cmd, args, argc);
       }
       // child should exit now
-      goto cleanup;
+      break;
     } else if ( pid > 0 ) {
       // in the parent
       waitpid( pid, 0, 0 );
@@ -226,9 +227,6 @@ int main() {
     free( args );
   }
 
-  printf( "Exiting sbush.\n" );
-
-cleanup:
   free( path );
   free( ps1 );
   for( i = 0; args[ i ] != NULL; i++ )
