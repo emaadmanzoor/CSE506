@@ -117,8 +117,10 @@ char** getargs( char* cmd, char* buf, int *nargs ) {
 }
 
 int main() {
-  char buf[ MAX_BUF_SIZE ] = { 0 };
-  char cmd[ MAX_CMD_LEN ] = { 0 };
+  static char buf[ MAX_BUF_SIZE ];
+  static char cmd[ MAX_CMD_LEN ];
+  //char buf[ MAX_BUF_SIZE ] = { 0 };
+  //char cmd[ MAX_CMD_LEN ] = { 0 };
   char** args;
   int argc;
   int argindex, pid, bgpid;
@@ -139,6 +141,7 @@ int main() {
       cmd[ i ] = 0;
 
     // prompt
+    printf( "\n" );
     printf(ps1);
     printf(">");
 
