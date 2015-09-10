@@ -15,15 +15,21 @@ void getenv(char *const args[], int argc) {
     }
 
     if (strcmp(args[1], "PATH") == 0) {
-       if (path != NULL)
-           printf("PATH=%s\n", path);
-       else
+       if (path != NULL) {
+           printf("PATH=");
+           printf(path);
+           printf("\n");
+       } else {
            printf("PATH=unset\n");
+       }
     } else if (strcmp(args[1], "PS1") == 0) {
-       if (ps1 != NULL)
-           printf("PS1=%s\n", ps1);
-       else
+       if (ps1 != NULL) {
+           printf("PS1=");
+           printf(ps1);
+           printf("\n");
+       } else {
            printf("PS1=unset\n");
+       }
     } else {
         // TODO: variable is not PATH or PS1
         usage_getenv();

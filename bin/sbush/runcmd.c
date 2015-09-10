@@ -6,7 +6,6 @@
 // runs the executable by searching for it
 // on the path, returning -1 on failure.
 void runcmd(const char* cmd, char *const args[], int argc) {
-  int status;
   int i, path_len, current_path_idx;
   char *search_path;
   char *full_cmd;
@@ -14,7 +13,7 @@ void runcmd(const char* cmd, char *const args[], int argc) {
 
   // first try running the command as is, in case
   // it is present in the current working directory
-  status = execve(cmd, args, NULL);
+  execve(cmd, args, NULL);
 
   // then search on the PATH
   if (path == NULL)
@@ -48,7 +47,7 @@ void runcmd(const char* cmd, char *const args[], int argc) {
     //printf("Full command: %s\n", full_cmd);
 
     // execute the command
-    status = execve(full_cmd, args, NULL);
+    execve(full_cmd, args, NULL);
 
     // command failed
     free(full_cmd);
@@ -63,5 +62,5 @@ void runcmd(const char* cmd, char *const args[], int argc) {
 
   // failure
   free(search_path);
-  printf("Bad command or filename: %d\n", status);
+  printf("Bad command or filename\n");
 }

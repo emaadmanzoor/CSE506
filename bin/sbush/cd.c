@@ -13,6 +13,9 @@ void cd(char *const args[], int argc) {
         return;
     }
 
-    if (chdir(args[1]) < 0)
-        printf("cd to path %s failed\n", args[1]);
+    if (chdir(args[1]) < 0) {
+        printf("cd to path '");
+        printf(args[1]);
+        printf("' failed\n");
+    }
 }
