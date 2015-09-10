@@ -2,5 +2,5 @@
 #define _STDIO_H
 
 int printf(const char *format, ...);
-char *gets(char *str);
+char *gets(char *str, int max);
 #endif

@@ -142,7 +142,7 @@ int main() {
     printf(ps1);
     printf(">");
 
-    gets( buf );
+    gets( buf, MAX_BUF_SIZE );
     if( buf[ 0 ] == 0 )
       continue;
 
