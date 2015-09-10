@@ -46,7 +46,7 @@ int chdir(const char *path);
 // files
 typedef int64_t ssize_t;
 enum { O_RDONLY = 0, O_WRONLY = 1, O_RDWR = 2, O_CREAT = 0x40, O_DIRECTORY = 0x10000 };
-int open(const char *pathname, int flags);
+int open(const char *pathname, int flags, int mode);
 ssize_t read(int fd, void *buf, size_t count);
 ssize_t write(int fd, const void *buf, size_t count);
 enum { SEEK_SET = 0, SEEK_CUR = 1, SEEK_END = 2 };
