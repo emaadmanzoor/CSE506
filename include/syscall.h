@@ -53,7 +53,7 @@ static __inline int64_t syscall_3(uint64_t n, uint64_t a1, uint64_t a2, uint64_t
   return ret;
 }
 
-static __inline int64_t syscall_4(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3. uint64_t a4) {
+static __inline int64_t syscall_4(uint64_t n, uint64_t a1, uint64_t a2, uint64_t a3, uint64_t a4) {
   unsigned long ret;
   register long r10 __asm__("r10") = a4;
   __asm__ __volatile__ ("syscall" : "=a"(ret) : "a"(n), "D"(a1), "S"(a2), "d"(a3), "r"(r10): "rcx", "r11", "memory");
