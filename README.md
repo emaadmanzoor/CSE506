@@ -45,6 +45,8 @@ You can't.
 
 ### Warmup Project 1: Part 2
 
+**Branch name:** `w1p2`
+
 ## Useful Commands
 
 ```
