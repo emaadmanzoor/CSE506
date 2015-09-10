@@ -1,6 +1,10 @@
+#include <stdlib.h>
 #include <stdio.h>
 
 int main(int argc, char* argv[], char* envp[]) {
-	printf("Hello World!\n");
+	int fd;
+  printf("Hello World!\n");
+  fd = open("README.2md", O_RDWR);
+  fd++;
 	return 0;
 }
