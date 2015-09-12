@@ -2,6 +2,7 @@
 #define _STDLIB_H
 
 #include <sys/defs.h>
+#include <sys/dirent.h>
 
 extern __thread int errno;
 
@@ -55,15 +56,6 @@ int dup(int oldfd);
 int dup2(int oldfd, int newfd);
 
 // directories
-#define NAME_MAX 255
-struct dirent
-{
-  long d_ino;
-  off_t d_off;
-  unsigned short d_reclen;
-	unsigned char d_type;
-  char d_name [NAME_MAX+1];
-};
 void *opendir(const char *name);
 struct dirent *readdir(void *dir);
 int closedir(void *dir);
