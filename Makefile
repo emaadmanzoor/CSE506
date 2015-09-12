@@ -17,11 +17,6 @@ BIN_SRCS:=$(shell find bin/* -name \*.c)
 INCLUDES:=$(shell find include/ -type f -name \*.h)
 BINS:=$(addprefix $(ROOTFS)/,$(wildcard bin/*))
 
-SRC_DIR = src
-OBJ_DIR = obj
-LIB_SRCS:=$(wildcard $(SRC_DIR)/*.c)
-LIB_OBJS:=$(LIB_SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-
 .PHONY: all binary
 
 all: $(BINS)
@@ -29,15 +24,11 @@ all: $(BINS)
 $(ROOTLIB)/libc.a: $(patsubst %.s,obj/%.asm.o,$(LIBC_SRCS:%.c=obj/%.o))
 	$(AR) rcs $@ $^
 
-$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(ROOTLIB)/libc.a $(BIN_SRCS) $(INCLUDES) $(LIB_OBJS)
+$(BINS): $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $(ROOTLIB)/libc.a $(BIN_SRCS) $(INCLUDES)
 	@$(MAKE) --no-print-directory BIN=$@ binary
 
-binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c)) $(LIB_OBJS)
+binary: $(patsubst %.c,obj/%.o,$(wildcard $(BIN:rootfs/%=%)/*.c))
 	$(LD) $(LDLAGS) -o $(BIN) $(patsubst %.s,obj/%.asm.o,$(CRT_SRCS:%.c=obj/%.o)) $^ $(ROOTLIB)/libc.a
-
-$(LIB_OBJS): $(OBJ_DIR)/%.o : $(SRC_DIR)/%.c
-	@mkdir -p $(dir $@)
-	$(CC) -c $(CFLAGS) -o $@ $<
 
 obj/%.o: %.c $(INCLUDES)
 	@mkdir -p $(dir $@)
