@@ -61,6 +61,7 @@ struct dirent
   long d_ino;
   off_t d_off;
   unsigned short d_reclen;
+	unsigned char d_type;
   char d_name [NAME_MAX+1];
 };
 void *opendir(const char *name);
