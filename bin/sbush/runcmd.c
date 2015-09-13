@@ -16,10 +16,12 @@ void runcmd(const char* cmd, char *const args[], int argc) {
   execve(cmd, args, NULL);
 
   // then search on the PATH
-  if (path == NULL)
-    return;
-
   path_len = strlen(path);
+  if (path_len == 0) {
+    printf("Bad command or filename: check existence or +x permission\n");
+    return;
+  }
+
   search_path = (char *) malloc(sizeof(char) * (path_len + 1));
   strcpy(search_path, path);
 
@@ -62,5 +64,5 @@ void runcmd(const char* cmd, char *const args[], int argc) {
 
   // failure
   free(search_path);
-  printf("Bad command or filename\n");
+  printf("Bad command or filename: check existence or +x permission\n");
 }
