@@ -1,5 +1,5 @@
 #include <stdlib.h>
-//@#include errno
+//#include errno
 #include "syscall.h"
 
 int open(const char *pathname, int flags) {

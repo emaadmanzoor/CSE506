@@ -37,8 +37,8 @@ void _start() {
    */
 
   __asm__("\
-    xor %rbp, %rbp \n\
-    mov %rsp, %rdi \n\
+    xorq %rbp, %rbp \n\
+    movq %rsp, %rdi \n\
     andq $-16, %rsp \n\
     call _cstart \n\
   ");
@@ -49,10 +49,11 @@ void _start() {
  * on the stack are in the form of 8-bytes.
  */
 void _cstart(long *sp) {
-  int argc = (int) sp[0];
-  char **argv = (char **) &sp[1];
-  // sp[argc+1] = NULL
-  char **envp = (char **) &sp[argc+2];
+  // sp[0] == %rbp, pushed by compiler-generated asm
+  int argc = (int) sp[1];
+  char **argv = (char **) &sp[2];
+  // sp[argc+3] = NULL
+  char **envp = (char **) &sp[argc+4];
 
   int res;
   res = main(argc, argv, envp);
