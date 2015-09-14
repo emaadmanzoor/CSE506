@@ -2,5 +2,9 @@
 #include "syscall.h"
 
 int dup2(int oldfd, int newfd) {
-  return syscall_2(SYS_dup2, oldfd, newfd);
+  int res = syscall_2(SYS_dup2, oldfd, newfd);
+  if (res < 0) {
+    return -1;
+  }
+  return res;
 }
