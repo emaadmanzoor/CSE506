@@ -52,8 +52,8 @@ void _cstart(long *sp) {
   // sp[0] == %rbp, pushed by compiler-generated asm
   int argc = (int) sp[1];
   char **argv = (char **) &sp[2];
-  // sp[argc+3] = NULL
-  char **envp = (char **) &sp[argc+4];
+  // sp[argc+2] = NULL
+  char **envp = (char **) &sp[argc+3];
 
   int res;
   res = main(argc, argv, envp);
