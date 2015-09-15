@@ -49,11 +49,14 @@ void _start() {
  * on the stack are in the form of 8-bytes.
  */
 void _cstart(long *sp) {
-  // sp[0] == %rbp, pushed by compiler-generated asm
-  int argc = (int) sp[1];
-  char **argv = (char **) &sp[2];
-  // sp[argc+2] = NULL
-  char **envp = (char **) &sp[argc+3];
+  // If no -O1 in the CFLAGS:
+  //  sp[0] == %rbp, pushed by compiler-generated asm
+  // else
+  //  sp[0] = argc
+  int argc = (int) sp[0];
+  char **argv = (char **) &sp[1];
+  // sp[argc+1] = NULL
+  char **envp = (char **) &sp[argc+2];
 
   int res;
   res = main(argc, argv, envp);
