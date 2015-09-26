@@ -5,6 +5,7 @@
 #include <sys/dirent.h>
 
 extern __thread int errno;
+extern char **environ;
 
 void exit(int status);
 
@@ -12,6 +13,7 @@ void exit(int status);
 void *malloc(size_t size);
 void free(void *ptr);
 int brk(void *end_data_segment);
+void *sbrk(long inc);
 
 // processes
 pid_t fork(void);
@@ -56,5 +58,10 @@ int dup2(int oldfd, int newfd);
 void *opendir(const char *name);
 struct dirent *readdir(void *dir);
 int closedir(void *dir);
+
+#define O_RDONLY  0x0000
+#define O_WRONLY  0x0001
+#define O_RDWR    0x0002
+#define O_ACCMODE 0x0003
 
 #endif
