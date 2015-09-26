@@ -3,16 +3,16 @@
 #include <stdarg.h>
 
 int printf(const char *format, ...) {
-	va_list val;
-	int printed = 0;
+  va_list val;
+  int printed = 0;
 
-	va_start(val, format);
+  va_start(val, format);
 
-	while(*format) {
-		//write(1, format, 1);
-		++printed;
-		++format;
-	}
+  while(*format) {
+    write(1, format, 1);
+    ++printed;
+    ++format;
+  }
 
-	return printed;
+  return printed;
 }
