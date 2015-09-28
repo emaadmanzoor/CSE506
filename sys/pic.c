@@ -14,11 +14,6 @@
 
 // initialise the PIC cascade
 void init_pic() {
-  // mask all pins so any interrupts arriving during
-  // initialisation are ignored.
-  // outb(PIC1_CMD, 0xff);
-  // outb(PIC2_CMD, 0xff);
-
   /* ICW1: 00010001 (see specs)
    *  - Enable multiple PICs
    *  - Enable edge-senstive IRQ (QEMU fails otherwise)
