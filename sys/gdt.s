@@ -21,9 +21,10 @@ _x86_64_asm_lgdt:
 	movabsq $.done, %r10
 	pushq %r10                  # push return address
 	lretq                       # far-return to new cs descriptor ( the retq below )
+                              # (this is because we cannot directly change cs)
 .done:
-	movq %rdx, %es
-	movq %rdx, %fs
+	movq %rdx, %es              # copy GDT offset to the remaining segment registers
+	movq %rdx, %fs              # (we couldn't do this for cs)
 	movq %rdx, %gs
 	movq %rdx, %ds
 	movq %rdx, %ss
