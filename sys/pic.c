@@ -16,7 +16,7 @@
 void init_pic() {
   /* ICW1: 00010001 (see specs)
    *  - Enable multiple PICs
-   *  - Enable edge-senstive IRQ (QEMU fails otherwise)
+   *  - Enable edge-sensitive IRQ (QEMU fails otherwise)
    *  - Enable sending ICW4
    */
   outb(PIC1_CMD, 0x11);
