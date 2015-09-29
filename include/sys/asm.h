@@ -37,4 +37,8 @@ static __inline uint8_t inb(uint16_t port) {
   return data;
 }
 
+static __inline void sti() {
+  __asm__ __volatile__ ("sti");
+}
+
 #endif
