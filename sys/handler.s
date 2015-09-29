@@ -1,15 +1,8 @@
 # Based on ideas from https://littleosbook.github.io/:
 #   Section 6.4. Creating a Generic Interrupt Handler
-#
-# Instead of using NASM capabilities, we have hacked
-# in an interrupt handler for each number 0 - 256,
-# each of which does pretty much the same thing:
-#   - save the error code (or 0)
-#     ("The specific CPU interrupts that put an error
-#       code on the stack are 8, 10, 11, 12, 13, 14
-#       and 17." - Section 6.3)
-#   - save the interrupt number
-#   - call the generic interrupt handler
+# See also: ints.s
+#   The individual handlers in ints.s all call
+#   handler in this file.
 
 .global handler
 handler:
