@@ -41,4 +41,10 @@ static __inline void sti() {
   __asm__ __volatile__ ("sti");
 }
 
+static __inline void lidt(uint64_t p_idtr) {
+  __asm__ __volatile__ ("lidt (%0)"
+                        : // no output
+                        : "r" (p_idtr));
+}
+
 #endif

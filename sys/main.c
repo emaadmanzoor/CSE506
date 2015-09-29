@@ -1,5 +1,6 @@
 #include <sys/sbunix.h>
 #include <sys/gdt.h>
+#include <sys/idt.h>
 #include <sys/tarfs.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
@@ -37,6 +38,7 @@ void boot(void)
   reload_gdt();
   setup_tss();
   init_pic();
+  init_idt();
   start(
     (uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
     &physbase,
