@@ -1,6 +1,9 @@
 #include <sys/sbunix.h>
 #include <sys/gdt.h>
 #include <sys/idt.h>
+#include <sys/asm.h>
+#include <sys/key.h>
+#include <sys/pic.h>
 #include <sys/tarfs.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
@@ -17,6 +20,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   }
   printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
   // kernel starts here
+  while(1) {};
 }
 
 #define INITIAL_STACK_SIZE 4096
@@ -37,8 +41,10 @@ void boot(void)
   );
   reload_gdt();
   setup_tss();
-  init_pic();
   init_idt();
+  init_pic();
+  init_kb();
+  sti(); // enable hardware interrupts
   start(
     (uint32_t*)((char*)(uint64_t)loader_stack[3] + (uint64_t)&kernmem - (uint64_t)&physbase),
     &physbase,

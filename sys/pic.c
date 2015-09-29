@@ -5,12 +5,7 @@
  */
 
 #include <sys/asm.h>
-
-// PIC ports
-#define PIC1_CMD 0x20
-#define PIC1_DAT 0x21
-#define PIC2_CMD 0xA0
-#define PIC2_DAT 0xA1
+#include <sys/pic.h>
 
 // initialise the PIC cascade
 void init_pic() {
@@ -58,7 +53,7 @@ void init_pic() {
   outb(PIC1_DAT, 0x1);
   outb(PIC2_DAT, 0x1);
 
-  // clear the interrupt mask
-  outb(PIC1_DAT, 0x0);
-  outb(PIC2_DAT, 0x0);
+  // disable all IRQ lines
+  outb(PIC1_DAT, 0xff);
+  outb(PIC2_DAT, 0xff);
 }
