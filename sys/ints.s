@@ -27,11 +27,19 @@ int3:
   pushq $0
   jmp handler
 
-# for the timer hardware interrupt
+# timer interrupt IRQ0
 .global int32 
 .align 16
 int32:
   pushq $32
+  pushq $0
+  jmp handler
+
+# keyboard interrupt IRQ1
+.global int33
+.align 16
+int33:
+  pushq $33
   pushq $0
   jmp handler
 
@@ -45,4 +53,5 @@ ints:
   .quad int3
   .skip 8 * (32 - 3 - 1)
   .quad int32 
-  .skip 8 * (255 - 32)
+  .quad int33
+  .skip 8 * (255 - 33)
