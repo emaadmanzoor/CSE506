@@ -5,6 +5,7 @@
 #   handler in this file.
 
 .global handler
+.align 16
 handler:
   # generic interrupt handler
   # The C compiler should take care of saving

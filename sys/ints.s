@@ -21,6 +21,7 @@
 
 # software interrupt for testing
 .global int3
+.align 16
 int3:
   pushq $3
   pushq $0
@@ -28,6 +29,7 @@ int3:
 
 # for the timer hardware interrupt
 .global int32 
+.align 16
 int32:
   pushq $32
   pushq $0
@@ -37,6 +39,7 @@ int32:
 
 # jump table for interrupt handlers
 .global ints
+.align 16
 ints:
   .skip 8 * 3
   .quad int3

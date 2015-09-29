@@ -34,8 +34,6 @@ static struct idtr_t idtr = {
 	(uint64_t) idt
 };
 
-void _x86_64_asm_lidt(struct idtr_t* idtr);
-
 void init_idt() {
   int i;
 
@@ -52,7 +50,7 @@ void init_idt() {
   lidt((uint64_t) &idtr);
 
   // test software interrupt
-  //__asm__ __volatile__ ("int $3"); 
+  //__asm__ __volatile__ ("int $3");
 }
 
 void interrupt_handler(uint32_t intno, uint32_t errcode) {

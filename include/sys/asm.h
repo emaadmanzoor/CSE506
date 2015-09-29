@@ -31,8 +31,8 @@ static __inline void outb(uint16_t port, uint8_t cmd) {
 static __inline uint8_t inb(uint16_t port) {
   uint8_t data;
   __asm__ __volatile__ ("in %1, %0" // reverse so data is first
-                        : "=a" (port) 
-                        : "d" (data)
+                        : "=a" (data)
+                        : "d" (port)
                         ); 
   return data;
 }
