@@ -52,7 +52,3 @@ void init_idt() {
   // test software interrupt
   //__asm__ __volatile__ ("int $3");
 }
-
-void interrupt_handler(uint32_t intno, uint32_t errcode) {
-  // TODO
-}
