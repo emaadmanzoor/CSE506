@@ -4,6 +4,7 @@
 #include <sys/asm.h>
 #include <sys/key.h>
 #include <sys/pic.h>
+#include <sys/pit.h>
 #include <sys/tarfs.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
@@ -20,7 +21,9 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   }
   printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
   // kernel starts here
-  while(1) {};
+  for(;;) {
+    __asm__ __volatile__ ("hlt");
+  }
 }
 
 #define INITIAL_STACK_SIZE 4096
@@ -43,6 +46,7 @@ void boot(void)
   setup_tss();
   init_idt();
   init_pic();
+  init_pit();
   init_kb();
   sti(); // enable hardware interrupts
   start(

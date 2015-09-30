@@ -3,5 +3,5 @@
 #include <sys/pic.h>
 
 void init_kb() {
-  outb(PIC1_DAT, ~(1 << IRQ_KEY)); // enable keyboard IRQ line
+  enable_irq(IRQ_KEY);
 }
