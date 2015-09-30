@@ -4,7 +4,9 @@
 
 #define MAX_GDT 32
 
+// this just has the executable bit set in the access type byte
 #define GDT_CS        (0x00180000000000)  /*** code segment descriptor ***/
+// this has the executable bit cleared in the access type byte
 #define GDT_DS        (0x00100000000000)  /*** data segment descriptor ***/
 
 #define C             (0x00040000000000)  /*** conforming ***/
@@ -32,6 +34,9 @@ struct sys_segment_descriptor {
 	uint64_t sd_xx3:19;    /* reserved */
 }__attribute__((packed));
 
+/* All segments overlap and span the entire address space; they are
+ * used only to manage permissions between user/kernel space.
+ */
 uint64_t gdt[MAX_GDT] = {
 	0,                      /*** NULL descriptor ***/
 	GDT_CS | P | DPL0 | L,  /*** kernel code segment descriptor ***/
@@ -54,6 +59,8 @@ static struct gdtr_t gdtr = {
 void _x86_64_asm_lgdt(struct gdtr_t* gdtr, uint64_t cs_idx, uint64_t ds_idx);
 
 void reload_gdt() {
+  // CS offset is 8 since NULL is at offset 0.
+  // DS offset is at 16, right after CS.
 	_x86_64_asm_lgdt(&gdtr, 8, 16);
 }
 
