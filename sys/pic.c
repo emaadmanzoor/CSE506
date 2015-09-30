@@ -7,6 +7,9 @@
 #include <sys/asm.h>
 #include <sys/pic.h>
 
+static uint8_t currmask1 = 0xfb; // PIC1
+static uint8_t currmask2 = 0xfb; // PIC2
+
 // initialise the PIC cascade
 void init_pic() {
   /* ICW1: 00010001 (see specs)
@@ -53,7 +56,28 @@ void init_pic() {
   outb(PIC1_DAT, 0x1);
   outb(PIC2_DAT, 0x1);
 
-  // disable all IRQ lines
-  outb(PIC1_DAT, 0xff);
-  outb(PIC2_DAT, 0xff);
+  // disable all IRQ lines except IRQ2 (slave PIC)
+  outb(PIC1_DAT, 0xfb);
+  outb(PIC2_DAT, 0xfb);
+}
+
+void enable_irq(int irq) {
+  uint8_t mask;
+  if (irq >= 0 && irq <= 7) { // PIC1
+    mask = ~(1 << irq);
+    currmask1 &= mask;
+    outb(PIC1_DAT, currmask1);
+  } else if (irq >= 8 && irq <= 15) { // PIC2
+    mask = ~(1 << (8 - irq));
+    currmask2 &= mask;
+    outb(PIC1_DAT, currmask2);
+  }
+}
+
+void eoi(int irq) {
+  // send the eoi byte
+  if (irq >= 8) {
+    outb(PIC2_CMD, EOI);
+  }
+  outb(PIC1_CMD, EOI);
 }
