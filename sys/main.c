@@ -48,7 +48,7 @@ void boot(void)
   init_idt();
   init_pic();
   init_pit();
-  printat(CLOCK_X, CLOCK_Y, 0); // 0 in the bottom-right corner
+  printat(CLOCK_X, CLOCK_Y, 1, 0); // 0 in the bottom-right corner
   init_kb();
   sti(); // enable hardware interrupts
   start(

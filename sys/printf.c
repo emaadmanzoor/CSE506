@@ -108,7 +108,11 @@ void printf( char *str, ... ) {
   va_end( valist );
 }
 
-void printat( int x, int y, int val ) {
+/*
+ * type 0 = char
+ * type 1 = int
+ */
+void printat( int x, int y, int type, int val ) {
   //va_list args;
   int x_pos_backup, y_pos_back_up;
   x_pos_backup = x_pos;
@@ -118,7 +122,11 @@ void printat( int x, int y, int val ) {
   /*
    * Modify x_pos and y_pos, back up their values
    */
-  putint( val, 10 );
+  if ( type ) {
+    putint( val, 10 );
+  } else {
+    putchar( val );
+  }
   /*
    * Put the real values of x and y back
    */
