@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 #define VIDEO_MEM_ADDR 0xB8000
 
 /*
@@ -19,8 +21,6 @@ void putchar( char c ) {
   if ( c == '\n' ) {
     x_pos = 0;
     y_pos++;
-  //} 
-  //else if ( c == '%d' ) {
     
   } else {
     *location = c;
@@ -37,14 +37,40 @@ void putchar( char c ) {
 
 }
 
-void printf( char *str ) {
-  int i;
-  int formatted = 0;
-  //int *arg_ptr;
-  //int intgr;
-  //char intbuf[ 16 ];
+void putint( int intgr, int base ) {
+  char digits_space[] = "0123456789ABCDEF";
+  int num_digits = 0;
+  char intbuf[ 26 ];
 
-  //arg_ptr = &str + 1;
+  do {
+    intbuf[ num_digits ] = digits_space[ intgr % base ];
+    num_digits++;
+    intgr /= base;
+  } while ( intgr != 0 );
+
+  /*
+   * print the buffer backwards
+   */
+  for( num_digits--; num_digits >= 0; num_digits-- ) {
+    putchar( intbuf[ num_digits ] );
+  }
+
+}
+void printf( char *str, ... ) {
+  int i, num_args = 0;
+  int formatted = 0;
+  //unsigned int *arg_ptr;
+  int intgr;
+  va_list valist;
+
+  /*
+   * Count number of arguments
+   */
+  for ( i = 0; str[ i ] != '\0'; i++ ) {
+    if ( str[ i ] == '%' )
+      num_args++;
+  }
+  va_start( valist, str );
 
   for( i = 0; str[ i ] != '\0'; i++ ) {
     if ( !formatted ) {
@@ -53,20 +79,27 @@ void printf( char *str ) {
       else
         putchar( str[ i ] );
     } else {
-      /*if ( str[ i ] == 'd' ) {
-        // print integer
-        intgr = *arg_ptr;
-        while ( intgr > 0 ) {
-	  
-        }
+      if ( str[ i ] == 'd' ) {
+        /*
+	 * print integer
+	*/
+        intgr = va_arg( valist, int );
+	putint( intgr, 10 );
+	formatted = 0;
       } else if( str[ i ] == 'c' ) {
-        putchar( *arg_ptr );
-      } else if ( str[ i ] == 'x' ) {
+        putchar( va_arg( valist, int ) );
+	formatted = 0;
+      } else if ( str[ i ] == 'x' || str[ i ] == 'p' ) {
+	intgr = (long) va_arg( valist, char* );
+	putint( intgr, 16 );
+	formatted = 0;
       } else if ( str[ i ] == 's' ) {
-      } else if ( str[ i ] == 'p' ) {
+	formatted = 0;
       } else {
         // Unsupported format
-      }*/
+      }
     }
   }
+  va_end( valist );
 }
+
