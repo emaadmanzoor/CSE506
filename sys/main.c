@@ -13,6 +13,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     uint64_t base, length;
     uint32_t type;
   }__attribute__((packed)) *smap;
+
   while(modulep[0] != 0x9001) modulep += modulep[1]+2;
   for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
     if (smap->type == 1 /* memory */ && smap->length != 0) {
@@ -20,6 +21,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     }
   }
   printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+  printat( 70, 24, 569);
   // kernel starts here
   for(;;) {
     __asm__ __volatile__ ("hlt");

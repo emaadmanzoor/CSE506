@@ -4,5 +4,5 @@
 #include <sys/defs.h>
 
 void printf(const char *fmt, ...);
-
+void printat( int x, int y, int val );
 #endif

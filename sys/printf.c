@@ -57,12 +57,12 @@ void putint( int intgr, int base ) {
 
 }
 void printf( char *str, ... ) {
-  int i, num_args = 0;
+  int i, j, num_args = 0;
   int formatted = 0;
   //unsigned int *arg_ptr;
   int intgr;
   va_list valist;
-  //char str_buf;
+  char* str_buf;
 
   /*
    * Count number of arguments
@@ -95,7 +95,10 @@ void printf( char *str, ... ) {
 	putint( intgr, 16 );
 	formatted = 0;
       } else if ( str[ i ] == 's' ) {
-	//str_buf = va_arg( valist, char* );
+	str_buf = va_arg( valist, char* );
+	for( j = 0; str_buf[ j ] != '\0' ; j++ ) {
+	  putchar( str_buf[ j ] );
+	}
 	formatted = 0;
       } else {
         // Unsupported format, don't want to exit from the kernel for this!
@@ -105,3 +108,20 @@ void printf( char *str, ... ) {
   va_end( valist );
 }
 
+void printat( int x, int y, int val ) {
+  //va_list args;
+  int x_pos_backup, y_pos_back_up;
+  x_pos_backup = x_pos;
+  x_pos = x;
+  y_pos_back_up = y_pos;
+  y_pos = y;
+  /*
+   * Modify x_pos and y_pos, back up their values
+   */
+  putint( val, 10 );
+  /*
+   * Put the real values of x and y back
+   */
+  x_pos = x_pos_backup;
+  y_pos = y_pos_back_up;
+}
