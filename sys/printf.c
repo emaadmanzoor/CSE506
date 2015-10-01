@@ -62,6 +62,7 @@ void printf( char *str, ... ) {
   //unsigned int *arg_ptr;
   int intgr;
   va_list valist;
+  //char str_buf;
 
   /*
    * Count number of arguments
@@ -90,13 +91,14 @@ void printf( char *str, ... ) {
         putchar( va_arg( valist, int ) );
 	formatted = 0;
       } else if ( str[ i ] == 'x' || str[ i ] == 'p' ) {
-	intgr = (long) va_arg( valist, char* );
+	intgr = (long) va_arg( valist, int );
 	putint( intgr, 16 );
 	formatted = 0;
       } else if ( str[ i ] == 's' ) {
+	//str_buf = va_arg( valist, char* );
 	formatted = 0;
       } else {
-        // Unsupported format
+        // Unsupported format, don't want to exit from the kernel for this!
       }
     }
   }
