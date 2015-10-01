@@ -2,14 +2,17 @@
 #include <sys/pit.h>
 #include <sys/key.h>
 #include <sys/asm.h>
+#include <sys/sbunix.h>
 
-static uint8_t ticks;
+static uint32_t ticks;
+static uint32_t secs; // seconds since boot
 
 void pitintr() {
   ticks++;
-  if (ticks % INTR_FREQ == 0) {
-    // print on screen
+  if (ticks == TICKS_PER_SEC) {
     ticks = 0;
+    secs++;
+    printat(CLOCK_X, CLOCK_Y, secs);
   }
   eoi(IRQ_PIT);
 }

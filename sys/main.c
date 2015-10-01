@@ -21,7 +21,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     }
   }
   printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
-  printat( 70, 24, 569);
   // kernel starts here
   for(;;) {
     __asm__ __volatile__ ("hlt");
@@ -49,6 +48,7 @@ void boot(void)
   init_idt();
   init_pic();
   init_pit();
+  printat(CLOCK_X, CLOCK_Y, 0); // 0 in the bottom-right corner
   init_kb();
   sti(); // enable hardware interrupts
   start(

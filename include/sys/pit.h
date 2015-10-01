@@ -10,9 +10,10 @@
  *   The strange frequency division is probably to mitigate
  *   floating point error propagation (check).
  */
-#define TIMER_FREQ  1193182
+#define TIMER_FREQ    1193182
 #define TIMER_DIV(x)  ((TIMER_FREQ+(x)/2)/(x))
 
-#define INTR_FREQ  100 // interrupt 100 times per second
+#define INTR_FREQ     100
+#define TICKS_PER_SEC TIMER_DIV(INTR_FREQ)/INTR_FREQ
 
 void init_pit();
