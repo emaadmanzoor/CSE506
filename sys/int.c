@@ -20,7 +20,7 @@ void pitintr() {
 
 void kbdintr() {
   char c;
-  char keycode;
+  char keycode = '\0';
   unsigned char status;
   static int shiftpressed = 0;
 
