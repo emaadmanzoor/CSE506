@@ -4,8 +4,8 @@
  *  Command specs: http://stanislavs.org/helppc/8259.html
  */
 
+#include <sys/sbunix.h>
 #include <sys/asm.h>
-#include <sys/pic.h>
 
 static uint8_t currmask1 = 0xfb; // PIC1
 static uint8_t currmask2 = 0xfb; // PIC2

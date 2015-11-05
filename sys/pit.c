@@ -2,8 +2,7 @@
  * Handle the 8253 PIT
  */
 
-#include <sys/pit.h>
-#include <sys/pic.h>
+#include <sys/sbunix.h>
 #include <sys/asm.h>
 
 void init_pit() {

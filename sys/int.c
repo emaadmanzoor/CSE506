@@ -1,8 +1,5 @@
-#include <sys/pic.h>
-#include <sys/pit.h>
-#include <sys/key.h>
-#include <sys/asm.h>
 #include <sys/sbunix.h>
+#include <sys/asm.h>
 #include <sys/key_map.h>
 
 static uint32_t ticks;

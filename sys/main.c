@@ -1,10 +1,5 @@
 #include <sys/sbunix.h>
-#include <sys/gdt.h>
-#include <sys/idt.h>
 #include <sys/asm.h>
-#include <sys/key.h>
-#include <sys/pic.h>
-#include <sys/pit.h>
 #include <sys/tarfs.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
