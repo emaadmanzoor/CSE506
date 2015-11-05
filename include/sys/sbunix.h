@@ -40,6 +40,15 @@
 #define CHAR_X ( CLOCK_X - 1 )
 #define CHAR_Y CLOCK_Y
 
+// kmem.c constants
+#define PGSIZE    4096
+#define KERNBASE  0xFFFFFFFF80000000 // from linker.script
+#define V2P(m)    ((m) - KERNBASE)
+#define P2V(m)    ((m) + KERNBASE)
+/* Source: http://stackoverflow.com/questions/2601121/mprotect-how-aligning-to-multiple-of-pagesize-works */
+#define ALIGNUP(x)  ((x + PGSIZE-1) & ~(PGSIZE-1))
+#define ALIGNDN(x)  (x & ~(PGSIZE-1))
+
 // gdt.c
 struct tss_t {
     uint32_t reserved;
@@ -69,5 +78,9 @@ void eoi(int irq);
 // print.c
 void printf(const char *fmt, ...);
 void printat( int x, int y, int type, int val );
+
+// kmem.c
+void kfree_range(void *vstart, void *vend);
+void kfree(char *v);
 
 #endif
