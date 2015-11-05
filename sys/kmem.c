@@ -8,7 +8,7 @@ struct pageframe *freelist;
 // free pages in range [vstart, vend)
 void kfree_range(void *vstart, void *vend) {
   for (char *p = (char*) ALIGNUP((uint64_t) vstart);
-       p < (char*) vend; p += PGSIZE)
+       p + PGSIZE < (char*) vend; p += PGSIZE)
     kfree(p);
 }
 
