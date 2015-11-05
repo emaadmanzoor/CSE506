@@ -1,10 +1,5 @@
 #include <sys/sbunix.h>
-#include <sys/gdt.h>
-#include <sys/idt.h>
 #include <sys/asm.h>
-#include <sys/key.h>
-#include <sys/pic.h>
-#include <sys/pit.h>
 #include <sys/tarfs.h>
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
@@ -14,14 +9,20 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     uint32_t type;
   }__attribute__((packed)) *smap;
 
+  void *physend = 0;
+
   while(modulep[0] != 0x9001) modulep += modulep[1]+2;
   for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
     if (smap->type == 1 /* memory */ && smap->length != 0) {
       printf("Available Physical Memory [%x-%x]\n", smap->base, smap->base + smap->length);
+      physend = (void*) smap->base + smap->length;
     }
   }
   printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+
   // kernel starts here
+  kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
+
   for(;;) {
     __asm__ __volatile__ ("hlt");
   }

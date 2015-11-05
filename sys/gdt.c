@@ -1,4 +1,4 @@
-#include <sys/gdt.h>
+#include <sys/sbunix.h>
 
 /* adapted from Chris Stones, shovelos */
 

@@ -1,4 +1,4 @@
-#include <sys/idt.h>
+#include <sys/sbunix.h>
 #include <sys/asm.h>
 
 #define MAX_IDT 256
