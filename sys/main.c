@@ -22,6 +22,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
   // kernel starts here
   kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
+  setupkvm(physend);
 
   for(;;) {
     __asm__ __volatile__ ("hlt");

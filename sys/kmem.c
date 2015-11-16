@@ -25,3 +25,21 @@ void kfree(char *v) {
   pf->next = freelist;
   freelist = pf;
 }
+
+char* kalloc(void) {
+  struct pageframe *pf;
+  pf = freelist;
+  if (pf == NULL)
+    return 0;
+  freelist = freelist->next;
+  return (char*) pf;
+}
+
+void memset( void *b, int c, int len ) {
+  unsigned char *p = b;
+  while (len > 0 ) {
+    *p = c;
+    p++;
+    len --;
+  }
+}

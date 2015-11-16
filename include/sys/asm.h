@@ -46,5 +46,8 @@ static __inline void lidt(uint64_t p_idtr) {
                         : // no output
                         : "r" (p_idtr));
 }
-
+static __inline void lcr3( uint64_t val)
+{
+  __asm__ __volatile__("movq %0, %%cr3" : : "r" (val));
+}
 #endif
