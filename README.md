@@ -53,6 +53,10 @@ You can't.
 valgrind rootfs/bin/sbush --track-origins=yes --leak-check=full -v
 ```
 
+```
+gdb -ex 'target remote localhost:9998' -ex 'break reload_gdt' -ex 'continue' ./kernel
+```
+
 ## Team
 
    * Rachee Singh (racsingh@cs.stonybrook.edu)
