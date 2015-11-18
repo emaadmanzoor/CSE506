@@ -6,8 +6,8 @@ struct pageframe {
 struct pageframe *freelist;
 
 // free pages in range [vstart, vend)
-void kfree_range(void *vstart, void *vend) {
-  for (char *p = (char*) ALIGNUP((uint64_t) vstart);
+void kfree_range(uint64_t vstart, uint64_t vend) {
+  for (char *p = (char*) ALIGNUP(vstart);
        p + PGSIZE < (char*) vend; p += PGSIZE)
     kfree(p);
 }
@@ -18,7 +18,7 @@ void kfree(char *v) {
 
   // write over existing data to catch bugs quickly
   for (char *p = v; p < v + PGSIZE; p++)
-    *p = 0xff;
+    *p = 0;
 
   // add v to the head of the free list
   pf = (struct pageframe*) v;
@@ -26,20 +26,23 @@ void kfree(char *v) {
   freelist = pf;
 }
 
-char* kalloc(void) {
+char *kalloc() {
   struct pageframe *pf;
+
+  if (freelist == NULL)
+    return NULL;
+
+  // pop a page from the top of the free list
   pf = freelist;
-  if (pf == NULL)
-    return 0;
   freelist = freelist->next;
   return (char*) pf;
 }
 
-void memset( void *b, int c, int len ) {
-  unsigned char *p = b;
-  while (len > 0 ) {
+void memset(void *b, char c, int len) {
+  char *p = b;
+  while (len > 0) {
     *p = c;
     p++;
-    len --;
+    len--;
   }
 }

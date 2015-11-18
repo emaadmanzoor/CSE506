@@ -1,5 +1,5 @@
+#include <sys/sbunix.h>
 #include <stdarg.h>
-#include<sys/sbunix.h>
 #define VIDEO_MEM_ADDR P2V(0xB8000)
 
 /*

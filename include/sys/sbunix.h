@@ -43,11 +43,11 @@
 // kmem.c constants
 #define PGSIZE    4096
 #define KERNBASE  0xFFFFFFFF80000000 // from linker.script
-#define V2P(m)    ((m) - KERNBASE)
-#define P2V(m)    ((m) + KERNBASE)
+#define V2P(m)    (((uint64_t) m) - KERNBASE)
+#define P2V(m)    (((uint64_t) m) + KERNBASE)
 /* Source: http://stackoverflow.com/questions/2601121/mprotect-how-aligning-to-multiple-of-pagesize-works */
-#define ALIGNUP(x)  (((x) + PGSIZE-1) & ~(PGSIZE-1))
-#define ALIGNDN(x)  ((x) & ~(PGSIZE-1))
+#define ALIGNUP(x)  ((((uint64_t) x) + PGSIZE-1) & ~(PGSIZE-1))
+#define ALIGNDN(x)  (((uint64_t) x) & ~(PGSIZE-1))
 
 #define PML4_SHIFT 39
 #define PDPT_SHIFT 30
@@ -94,12 +94,12 @@ void printf( const char *fmt, ...);
 void printat( int x, int y, int type, int val );
 
 // kmem.c
-void kfree_range(void *vstart, void *vend);
+void kfree_range(uint64_t vstart, uint64_t vend);
 void kfree(char *v);
-char* kalloc(void);
-void memset( void*, int, int );
+char *kalloc();
+void memset(void *b, char c, int len);
 
 // vm.c
-int setupkvm(void*);
+int setupkvm(uint64_t physend);
 
 #endif
