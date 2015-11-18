@@ -1,6 +1,6 @@
+#include <sys/sbunix.h>
 #include <stdarg.h>
-
-#define VIDEO_MEM_ADDR 0xB8000
+#define VIDEO_MEM_ADDR P2V(0xB8000)
 
 /*
  * The display is a matrix of 80 X 25
@@ -56,7 +56,7 @@ void putint( int intgr, int base ) {
   }
 
 }
-void printf( char *str, ... ) {
+void printf( const char *str, ... ) {
   int i, j, num_args = 0;
   int formatted = 0;
   //unsigned int *arg_ptr;
