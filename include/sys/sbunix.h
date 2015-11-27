@@ -100,6 +100,19 @@ char *kalloc();
 void memset(void *b, char c, int len);
 
 // vm.c
-int setupkvm(uint64_t physend);
+pte_t* setupkvm(uint64_t physend);
+void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
+
+// string.c
+int strcmp(const char *, const char *);
+int strlen(const char *);
+void strcpy(char *, const char *);
+void strncpy(char *, const char *, int);
+
+// utils.c
+int atoi(const char *);
+int octtodec(int);
+void panic(char *s);
+void jump_to_program(uint64_t entry, uint64_t sp);
 
 #endif
