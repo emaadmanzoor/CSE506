@@ -35,6 +35,8 @@ char *kalloc() {
   // pop a page from the top of the free list
   pf = freelist;
   freelist = freelist->next;
+  memset((void*) pf, 0, PGSIZE);
+
   return (char*) pf;
 }
 
