@@ -64,6 +64,15 @@
 #define PTE_U           0x004   // User
 
 // gdt.c
+#define KCODE           8     // byte offsets into the gdt
+#define KDATA           16    // for each segment selector
+#define UCODE           24
+#define UDATA           32
+
+#define RPL_U           3     // require USER privilege level
+
+#define IF              0x200   // interrupt enable flag
+
 struct tss_t {
     uint32_t reserved;
       uint64_t rsp0;

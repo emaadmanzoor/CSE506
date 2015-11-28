@@ -1,7 +1,9 @@
 #include <sys/sbunix.h>
 #include <sys/tarfs.h>
 
-void jump_to_program(uint64_t rip, uint64_t sp); // for debugging
+void jump_to_program(uint64_t rip, uint64_t rsp); // for debugging
+void jump_to_user(uint64_t rip, uint64_t rsp,
+                  uint64_t cs, uint64_t ds, uint64_t flags); // for debugging
 
 // observation
 //  after the last file in tarfs, there are
@@ -84,6 +86,9 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh) {
   sp = va + PGSIZE;
 
   sp++; // just to make the compiler stop complaining
+  //jump_to_program(eh->entry, sp); // DEBUG
+  //jump_to_user(eh->entry, sp, UCODE | RPL_U, UDATA | RPL_U, IF); // DEBUG
+
   // TODO
   // proc->tf.rip = eh->entry
   // proc->tf.rsp = sp
@@ -92,5 +97,4 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh) {
   // proc->sz = sz
   // switchuvm(proc) // calls lcr3
   // freevm(oldpgdiir)
-  // jump_to_program(eh->entry, sp); // DEBUG
 }

@@ -4,7 +4,7 @@
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
-  //pte_t* kpgdir; DEBUG
+  //pte_t* kpgdir; // DEBUG
 
   struct smap_t {
     uint64_t base, length;
@@ -31,8 +31,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   setupkvm(physend); // setup kernel page table mappings
 
   // DEBUG program mapping from ELF binary
-  // struct elfheader* eh = get_elf_header("bin/hello");
-  // map_program_binary(kpgdir, eh);
+  //struct elfheader* eh = get_elf_header("bin/hello");
+  //map_program_binary(kpgdir, eh);
 
   for(;;) {
     __asm__ __volatile__ ("hlt");
