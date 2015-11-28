@@ -34,7 +34,7 @@ pte_t* setupkvm(uint64_t physend) {
       }
 
       memset(pdpt, 0, PGSIZE); // kalloc does this, but just to be sure
-      *pml4e = V2P(pdpt) | PTE_P | PTE_W | PTE_U;
+      *pml4e = V2P(pdpt) | PTE_P | PTE_W;
     }
 
     // Level 2. Map the PDT entry in PDPT
@@ -48,7 +48,7 @@ pte_t* setupkvm(uint64_t physend) {
       }
 
       memset(pdt, 0, PGSIZE); // kalloc does this, but just to tbe sure
-      *pdpte = V2P(pdt) | PTE_P | PTE_W | PTE_U;
+      *pdpte = V2P(pdt) | PTE_P | PTE_W;
     }
 
     // Level 3. Map the PT entry in PDT
@@ -62,7 +62,7 @@ pte_t* setupkvm(uint64_t physend) {
       }
 
       memset(pt, 0, PGSIZE); // kalloc does this, but just to be sure
-      *pde = V2P(pt) | PTE_P | PTE_W | PTE_U;
+      *pde = V2P(pt) | PTE_P | PTE_W;
     }
 
     // Level 4. Map the physical address in PT
@@ -72,7 +72,7 @@ pte_t* setupkvm(uint64_t physend) {
       // Madness, remapping? Something bad has happened
     }
 
-    *pte = pa | PTE_P | PTE_W | PTE_U;
+    *pte = pa | PTE_P | PTE_W;
 
     // Check for termination
     if (va == last_va)
@@ -140,7 +140,5 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
     panic("Mapping exists\n"); // Madness, remapping? Something bad has happened
   }
 
-  *pte = pa | PTE_P | PTE_U | PTE_W;
-
-  //lcr3(V2P(pml4));
+  *pte = pa | PTE_P | perm;
 }
