@@ -21,6 +21,9 @@
 #define PIT_DAT 0x40 // use channel 0
 #define PIT_CMD 0x43
 
+// proc.c constants
+#define MAX_PROC 64
+
 /* Source: FreeBSD
  * Frequency of all three count-down timers; (TIMER_FREQ/freq) is the
  * appropriate count to generate a frequency of freq hz.
@@ -114,6 +117,7 @@ char *kalloc();
 // vm.c
 pte_t* setupkvm(uint64_t physend);
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
+void loadkpgdir(pte_t*);
 
 // string.c
 int strcmp(const char *, const char *);
@@ -131,4 +135,6 @@ void memset(void *b, char c, int len);
 // syscall.c
 void syscall();
 
+// proc.c
+struct proc* alloc_proc();
 #endif

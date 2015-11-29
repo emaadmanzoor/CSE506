@@ -26,6 +26,7 @@ pte_t* setupkvm(uint64_t physend) {
     // Level 1. Map the PDPT entry in PML4E
     pml4e = &pml4[PML4_INDEX(va)];
     if (*pml4e & PTE_P) {
+      // OR'ing with !fff to clear the last 12 bits of the value inside tables
       pdpt = (pte_t*) P2V(*pml4e & ~(0xfff));
     } else {
 
@@ -82,9 +83,11 @@ pte_t* setupkvm(uint64_t physend) {
     va += PGSIZE;
   }
 
-  lcr3(V2P(pml4));
-
   return pml4;
+}
+
+void loadkpgdir(pte_t* kpgdir) {
+  lcr3(V2P(kpgdir));
 }
 
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
