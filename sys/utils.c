@@ -32,3 +32,12 @@ void panic(char *s) {
     __asm__ __volatile__ ("hlt");
   }
 }
+
+void memset(void *b, char c, int len) {
+  char *p = b;
+  while (len > 0) {
+    *p = c;
+    p++;
+    len--;
+  }
+}
