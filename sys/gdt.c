@@ -1,4 +1,5 @@
 #include <sys/sbunix.h>
+#include <sys/asm.h>
 
 /* adapted from Chris Stones, shovelos */
 
@@ -74,4 +75,7 @@ void setup_tss() {
 	sd->sd_hilimit = 0;
 	sd->sd_gran = 0;
 	sd->sd_hibase = ((uint64_t)&tss) >> 24;
+
+  memset((void*)&tss, 0, sizeof(struct tss_t));
+  ltr(40); // byte index into gdt for gdt[5]
 }

@@ -7,39 +7,40 @@
 .global handler
 .align 16
 handler:
-  # generic interrupt handler
-  # The C compiler should take care of saving
-  # rbp, rbx, rsi, rdi, r12, r13, r14, r15 according to
-  # the AMD64 ABI. We handle the rest.
-
-  push %rsi
-  push %rdi
-
-  movq 24(%rsp), %rdi # int nbr
-  movq 16(%rsp), %rsi # err code
-
-  pushfq
-  pushq %r11
-  pushq %r10
-  pushq %r9
-  pushq %r8
   pushq %rax
+  pushq %rbx
   pushq %rcx
   pushq %rdx
+  pushq %rdi
+  pushq %rsi
+  pushq %r8
+  pushq %r9
+  pushq %r10
+  pushq %r11
+  pushq %r12
+  pushq %r13
+  pushq %r14
+  pushq %r15
 
-  call interrupt_handler # C function, params in rdi, rsi
+  movq %rsp, %rdi
+  callq interrupt_handler # interrupt_handler(struct trapframe* f)
 
+  popq %r15
+  popq %r14
+  popq %r13
+  popq %r12
+  popq %r11
+  popq %r10
+  popq %r9
+  popq %r8
+  popq %rsi
+  popq %rdi
   popq %rdx
   popq %rcx
+  popq %rbx
   popq %rax
-  popq %r8
-  popq %r9
-  popq %r10
-  popq %r11
-  popfq
-  popq %rdi
-  popq %rsi
 
   addq $16, %rsp # pop int nbr, err code
 
-  iretq
+  iretq          # pops the remaining elements on the stack
+                 # (TOP ss, rsp, rflags, cs, rip, BOTTOM)
