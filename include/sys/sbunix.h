@@ -85,6 +85,10 @@ void reload_gdt();
 void setup_tss();
 
 // idt.c
+#define N_PIT       32   // timer interrupt
+#define N_KBD       33   // keyboard interrupt
+#define N_SYSCALL   64   // system call
+
 void init_idt();
 
 // key.c
@@ -106,7 +110,6 @@ void printat( int x, int y, int type, int val );
 void kfree_range(uint64_t vstart, uint64_t vend);
 void kfree(char *v);
 char *kalloc();
-void memset(void *b, char c, int len);
 
 // vm.c
 pte_t* setupkvm(uint64_t physend);
@@ -123,5 +126,9 @@ int atoi(const char *);
 int octtodec(int);
 void panic(char *s);
 void jump_to_program(uint64_t entry, uint64_t sp);
+void memset(void *b, char c, int len);
+
+// syscall.c
+void syscall();
 
 #endif

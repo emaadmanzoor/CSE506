@@ -39,12 +39,3 @@ char *kalloc() {
 
   return (char*) pf;
 }
-
-void memset(void *b, char c, int len) {
-  char *p = b;
-  while (len > 0) {
-    *p = c;
-    p++;
-    len--;
-  }
-}
