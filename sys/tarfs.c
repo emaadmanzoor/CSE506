@@ -1,9 +1,6 @@
 #include <sys/sbunix.h>
 #include <sys/tarfs.h>
-
-void jump_to_program(uint64_t rip, uint64_t rsp); // for debugging
-void jump_to_user(uint64_t rip, uint64_t rsp,
-                  uint64_t cs, uint64_t ds, uint64_t flags); // for debugging
+#include <sys/proc.h>
 
 // observation
 //  after the last file in tarfs, there are
@@ -41,7 +38,7 @@ struct elfheader *get_elf_header(char *path) {
 
 // map the program pointed to by the ELF to the
 // given page table
-void map_program_binary(pte_t* pgdir, struct elfheader* eh) {
+void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
   int i = 0;
   struct progheader *ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   __volatile__ uint64_t va = -1, pa;
@@ -85,16 +82,12 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh) {
   create_mapping(pgdir, va, V2P(pa), PTE_W | PTE_U);
   sp = va + PGSIZE;
 
-  sp++; // just to make the compiler stop complaining
-  //jump_to_program(eh->entry, sp); // DEBUG
-  //jump_to_user(eh->entry, sp, UCODE | RPL_U, UDATA | RPL_U, IF); // DEBUG
-
-  // TODO
-  // proc->tf.rip = eh->entry
-  // proc->tf.rsp = sp
-  // oldpgdir = proc->pgdir (do this outside?)
-  // proc->pgdir = pgdir
-  // proc->sz = sz
-  // switchuvm(proc) // calls lcr3
-  // freevm(oldpgdiir)
+  proc->tf->rip = eh->entry;
+  proc->tf->rsp = sp;
+  proc->pgdir = pgdir;
+  proc->sz = PGSIZE;
+  proc->state = RUNNABLE;
+  proc->tf->cs = UCODE | RPL_U;
+  proc->tf->ds = UDATA | RPL_U;
+  proc->tf->eflags = IF;
 }

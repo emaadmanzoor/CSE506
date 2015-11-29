@@ -73,6 +73,6 @@ struct progheader {
 };
 
 struct elfheader* get_elf_header(char *path);
-void map_program_binary(pte_t* pgdir, struct elfheader* eh);
+void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc);
 
 #endif
