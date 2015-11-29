@@ -88,6 +88,27 @@ void reload_gdt();
 void setup_tss();
 
 // idt.c
+//// CPU defined
+#define N_DE        0    // divide by 0
+#define N_DB        1    // debug
+#define N_NMI       2    // non-maskable interrupt
+#define N_BP        3    // breakpoint
+#define N_OF        4    // overflow
+#define N_BR        5    // out of bounds
+#define N_UD        6    // invalid opcode
+#define N_NM        7    // device unavailable
+#define N_DF        8    // double fault
+#define N_CO        9    // coprocessor segment overrun
+#define N_TS       10    // invalid tss
+#define N_NP       11    // segment not present
+#define N_SS       12    // stack fault
+#define N_GP       13    // general protection fault
+#define N_PF       14    // page fault
+#define N_MF       16    // floating point error
+#define N_AC       17    // alignment check
+#define N_MC       18    // machine check
+#define N_XM       19    // SIMD
+//// user defined
 #define N_PIT       32   // timer interrupt
 #define N_KBD       33   // keyboard interrupt
 #define N_SYSCALL   64   // system call
@@ -133,7 +154,39 @@ void jump_to_program(uint64_t entry, uint64_t sp);
 void memset(void *b, char c, int len);
 
 // syscall.c
-void syscall();
+struct trapframe {
+  // 4. pushed by the generic handler
+  uint64_t r15;
+  uint64_t r14;
+  uint64_t r13;
+  uint64_t r12;
+  uint64_t r11;
+  uint64_t r10;
+  uint64_t r9;
+  uint64_t r8;
+  uint64_t rsi;
+  uint64_t rdi;
+  uint64_t rdx;
+  uint64_t rcx;
+  uint64_t rbx;
+  uint64_t rax;
+
+  // 3. pushed by the specific handler
+  uint64_t intno;
+
+  // 2. pushed by the interrupt (for X < 32)
+  // or by the specific handler (for X >= 32)
+  uint64_t errcode;
+
+  // 1. pushed by the interrupt (int X)
+  uint64_t rip;
+  uint64_t cs;
+  uint64_t rflags;
+  uint64_t rsp;   // kernel stack grows downwards
+  uint64_t ss;    // top of the kernel stack (high address)
+};
+
+void syscall(struct trapframe *);
 
 // proc.c
 struct proc* alloc_proc();

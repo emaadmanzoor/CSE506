@@ -33,7 +33,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   // kernel starts here
   kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
   kpgdir = setupkvm(physend); // setup kernel page table mappings
-  loadkpgdir( kpgdir );
+  loadkpgdir(kpgdir);
 
   init_proc = alloc_proc();
   
@@ -41,8 +41,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
   // Should modify the proc structure
   map_program_binary(kpgdir, eh, init_proc);
-  jump_to_user( eh->entry, init_proc->tf->rsp, init_proc->tf->cs,
-		init_proc->tf->ds, init_proc->tf->eflags );
+  jump_to_user(eh->entry, init_proc->tf->rsp, init_proc->tf->cs,
+               init_proc->tf->ss, IF);
 
   for(;;) {
     __asm__ __volatile__ ("hlt");
@@ -69,8 +69,7 @@ void boot(void)
   setup_tss();
   init_idt();
   init_pic();
-  // XXX-REMOVE
-  //init_pit();
+  init_pit();
   printat(CLOCK_X, CLOCK_Y, 1, 0); // 0 in the bottom-right corner
   init_kb();
   sti(); // enable hardware interrupts

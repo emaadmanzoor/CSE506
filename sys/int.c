@@ -41,8 +41,8 @@ void kbdintr() {
   printat( CHAR_X, CHAR_Y, 0, c );
 }
 
-void interrupt_handler(uint32_t intno, uint32_t errcode) {
-  switch (intno) {
+void interrupt_handler(struct trapframe* f) {
+  switch (f->intno) {
     case N_PIT:
       pitintr();
       break;
@@ -50,7 +50,7 @@ void interrupt_handler(uint32_t intno, uint32_t errcode) {
       kbdintr();
       break;
     case N_SYSCALL:
-      syscall();
+      syscall(f);
     default:
       break; 
   }

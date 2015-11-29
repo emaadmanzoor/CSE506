@@ -7,7 +7,7 @@ struct {
   struct proc proc[MAX_PROC];
 } ptable;
 
-struct proc* alloc_proc() {
+struct proc *alloc_proc() {
   int found = 0;
   struct proc *p;
   char *sp;
@@ -32,8 +32,9 @@ struct proc* alloc_proc() {
   }
 
   sp = p->kstack + KSTACKSIZE;
+  tss.rsp0 = (uint64_t) sp;
   sp -= sizeof *p->tf;
-  p->tf = (struct trapframe*)sp;
+  p->tf = (struct trapframe*) sp;
 
   return p;
 }

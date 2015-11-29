@@ -84,10 +84,10 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
 
   proc->tf->rip = eh->entry;
   proc->tf->rsp = sp;
+  proc->tf->cs = UCODE | RPL_U;
+  proc->tf->ss = UDATA | RPL_U;
+
   proc->pgdir = pgdir;
   proc->sz = PGSIZE;
   proc->state = RUNNABLE;
-  proc->tf->cs = UCODE | RPL_U;
-  proc->tf->ds = UDATA | RPL_U;
-  proc->tf->eflags = IF;
 }
