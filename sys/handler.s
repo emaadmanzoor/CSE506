@@ -15,8 +15,8 @@ handler:
   push %rsi
   push %rdi
 
-  movq 24(%rsp), %rdi # int nbr
-  movq 16(%rsp), %rsi # err code
+  movq 16(%rsp), %rdi # int nbr
+  movq 24(%rsp), %rsi # err code
 
   pushfq
   pushq %r11

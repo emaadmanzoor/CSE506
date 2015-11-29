@@ -39,16 +39,18 @@ void kbdintr() {
     c = key_map[ (unsigned char) keycode ];
   }
   printat( CHAR_X, CHAR_Y, 0, c );
- }
+}
 
 void interrupt_handler(uint32_t intno, uint32_t errcode) {
   switch (intno) {
-    case IRQ_OFF + IRQ_PIT:
+    case N_PIT:
       pitintr();
       break;
-    case IRQ_OFF + IRQ_KEY:
+    case N_KBD:
       kbdintr();
       break;
+    case N_SYSCALL:
+      syscall();
     default:
       break; 
   }

@@ -4,12 +4,11 @@
 #define MAX_IDT 256
 
 // for the config byte in an IDT entry
-#define PRESENT 0x80 // present bit
-#define DPL0    0x00 // DPL bits (13, 14)
-#define TYPE    0x0E // 386 32-bit trap gate
-
-// offset into the GDT (bytes)
-#define GDT_KCODE_OFFSET 0x8
+#define PRESENT     0x80 // present bit
+#define DPL0        0x00 // DPL bits (13, 14)
+#define DPL3        0x60 // DPL bits (13, 14) for syscalls
+#define TYPE_INT    0x0E // 32-bit interrupt gate (clears IF)
+#define TYPE_TRP    0x0F // 32-bit trap gate (does not clear IF)
 
 struct idt_entry_t {
   uint16_t offset_15_0;
@@ -39,12 +38,17 @@ void init_idt() {
 
   for (i = 0; i < MAX_IDT; i++) {
     idt[i].offset_15_0 = ints[i] & 0xffff;
-    idt[i].seg_selector = GDT_KCODE_OFFSET;
+    idt[i].seg_selector = KCODE;
     idt[i].zero = 0;
-    idt[i].type_attr = PRESENT | DPL0 | TYPE; 
     idt[i].offset_31_16 = (ints[i] >> 16) & 0xffff;
     idt[i].offset_63_32 = (ints[i] >> 32) & 0xffffffff;
     idt[i].zero2 = 0;
+
+    if (i == N_SYSCALL) {
+      idt[i].type_attr = PRESENT | DPL3 | TYPE_TRP;
+    } else {
+      idt[i].type_attr = PRESENT | DPL0 | TYPE_INT;
+    }
   }
 
   lidt((uint64_t) &idtr);
