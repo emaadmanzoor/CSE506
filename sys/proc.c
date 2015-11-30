@@ -90,3 +90,9 @@ void yield() {
   current_proc->state = RUNNABLE;
   swtch( &(current_proc->kcontext), kcontext );
 }
+
+void exit(int status) {
+  // exit the process
+  current_proc->state = UNUSED;
+  swtch( &(current_proc->kcontext), kcontext );
+}

@@ -193,6 +193,7 @@ struct proc* alloc_proc();
 void init_user_process( char*, uint64_t );
 void scheduler();
 void yield();
+void exit(int);
 // global kernel page tables
 pte_t* kpgdir;
 #endif
