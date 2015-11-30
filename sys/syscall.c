@@ -1,11 +1,16 @@
 #include <sys/sbunix.h>
+#include <sys/syscall.h>
 
 void syscall(struct usercontext *f) {
   // call system call
   // store result in eax
   // if failrue, store -1 in eax
-  if ( f->rax == 3 ) {
-    // to yield
-    yield();
+  switch (f->rax) {
+    case SYS_yield:
+      yield();
+      break;
+    case SYS_exit:
+      exit(f->rdi);
+      break;
   }
 }
