@@ -8,8 +8,7 @@ void jump_to_user(uint64_t rip, uint64_t rsp,
 
 void start(uint32_t* modulep, void* physbase, void* physfree)
 {
-  pte_t* kpgdir;
-  struct proc* init_proc;
+  // pte_t* kpgdir;
 
   struct smap_t {
     uint64_t base, length;
@@ -33,16 +32,19 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   // kernel starts here
   kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
   kpgdir = setupkvm(physend); // setup kernel page table mappings
-  loadkpgdir(kpgdir);
+  loadpgdir(kpgdir);
 
-  init_proc = alloc_proc();
-  
-  struct elfheader* eh = get_elf_header("bin/hello");
+  init_user_process( "bin/hello", physend );
+  //init_user_process( "bin/world" );
+
+  //hello_proc = alloc_proc();
+  //struct elfheader* eh = get_elf_header("bin/hello");
 
   // Should modify the proc structure
-  map_program_binary(kpgdir, eh, init_proc);
-  jump_to_user(eh->entry, init_proc->tf->rsp, init_proc->tf->cs,
-               init_proc->tf->ss, IF);
+  //map_program_binary(kpgdir, eh, hello_proc);
+  scheduler();
+  //jump_to_user(eh->entry, hello_proc->tf->rsp, hello_proc->tf->cs,
+  //hello_proc->tf->ss, IF);
 
   for(;;) {
     __asm__ __volatile__ ("hlt");

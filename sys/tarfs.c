@@ -82,10 +82,10 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
   create_mapping(pgdir, va, V2P(pa), PTE_W | PTE_U);
   sp = va + PGSIZE;
 
-  proc->tf->rip = eh->entry;
-  proc->tf->rsp = sp;
-  proc->tf->cs = UCODE | RPL_U;
-  proc->tf->ss = UDATA | RPL_U;
+  proc->ucontext->rip = eh->entry;
+  proc->ucontext->rsp = sp;
+  proc->ucontext->cs = UCODE | RPL_U;
+  proc->ucontext->ss = UDATA | RPL_U;
 
   proc->pgdir = pgdir;
   proc->sz = PGSIZE;

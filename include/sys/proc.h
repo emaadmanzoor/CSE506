@@ -1,19 +1,20 @@
 #define KSTACKSIZE 4096
-#define NPROC 64
 
 struct context {
+  uint64_t r15;
+  uint64_t r14;
+  uint64_t r13;
+  uint64_t r12;
   uint64_t r11;
-  uint64_t r10;
-  uint64_t r9;
-  uint64_t r8;
-  uint64_t rax;
-  uint64_t rcx;
-  uint64_t rdx;
+  uint64_t rbx;
+  uint64_t rbp;
   uint64_t rip;
 };
 
 enum procstate { UNUSED, USED, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
-
+struct context *kcontext;
+struct proc* current_proc;
+extern void swtch( struct context **old, struct context *new );
 struct proc {
   uint64_t sz;                     // Size of process memory (bytes)
   pte_t* pgdir;                // Page table
@@ -21,8 +22,8 @@ struct proc {
   enum procstate state;        // Process state
   int pid;                     // Process ID
   struct proc *parent;         // Parent process
-  struct trapframe *tf;        // Trap frame for current syscall
-  struct context *context;     // swtch() here to run process
+  struct usercontext *ucontext;        // Trap frame for current syscall
+  struct context *kcontext;     // swtch() here to run process
   int killed;                  // If non-zero, have been killed
   //struct file *ofile[NOFILE];  // Open files
   //struct inode *cwd;           // Current directory

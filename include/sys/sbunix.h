@@ -138,7 +138,7 @@ char *kalloc();
 // vm.c
 pte_t* setupkvm(uint64_t physend);
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
-void loadkpgdir(pte_t*);
+void loadpgdir(pte_t*);
 
 // string.c
 int strcmp(const char *, const char *);
@@ -154,7 +154,7 @@ void jump_to_program(uint64_t entry, uint64_t sp);
 void memset(void *b, char c, int len);
 
 // syscall.c
-struct trapframe {
+struct usercontext {
   // 4. pushed by the generic handler
   uint64_t r15;
   uint64_t r14;
@@ -186,8 +186,13 @@ struct trapframe {
   uint64_t ss;    // top of the kernel stack (high address)
 };
 
-void syscall(struct trapframe *);
+void syscall(struct usercontext *);
 
 // proc.c
 struct proc* alloc_proc();
+void init_user_process( char*, uint64_t );
+void scheduler();
+void yield();
+// global kernel page tables
+pte_t* kpgdir;
 #endif
