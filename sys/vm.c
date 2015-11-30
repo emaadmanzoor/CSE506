@@ -86,8 +86,8 @@ pte_t* setupkvm(uint64_t physend) {
   return pml4;
 }
 
-void loadkpgdir(pte_t* kpgdir) {
-  lcr3(V2P(kpgdir));
+void loadpgdir(pte_t* pgdir) {
+  lcr3(V2P(pgdir));
 }
 
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {

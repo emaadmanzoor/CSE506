@@ -41,7 +41,7 @@ void kbdintr() {
   printat( CHAR_X, CHAR_Y, 0, c );
 }
 
-void interrupt_handler(struct trapframe* f) {
+void interrupt_handler(struct usercontext* f) {
   switch (f->intno) {
     case N_PIT:
       pitintr();
