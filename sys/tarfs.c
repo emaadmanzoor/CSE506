@@ -38,13 +38,15 @@ struct elfheader *get_elf_header(char *path) {
 
 // map the program pointed to by the ELF to the
 // given page table
-void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
+void map_program_binary(char *path, struct proc* proc) {
   int i = 0;
+  struct elfheader *eh = get_elf_header(path);
   struct progheader *ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   __volatile__ uint64_t va = -1, pa;
   uint64_t pageoff, copyoff = 0;
   uint64_t sp;
 
+  loadpgdir(proc->pgdir); // temporarily to enable copying binary data
   for (; i < eh->phnum; i++, ph++) {
     // iteration for each program header in the ELF
     // each ELF contains a TEXT and DATA segment
@@ -60,7 +62,7 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
          va < ph->vaddr + ph->memsz;
          va += PGSIZE) {
       pa = (uint64_t) kalloc();
-      create_mapping(pgdir, va, V2P(pa), PTE_W | PTE_U);
+      create_mapping(proc->pgdir, va, V2P(pa), PTE_W | PTE_U);
 
       // copy min(PGSIZE, ph->filesz) bytes into the page at va
       for (pageoff = 0;
@@ -79,15 +81,12 @@ void map_program_binary(pte_t* pgdir, struct elfheader* eh, struct proc* proc) {
   // on a stack push, the pointer is FIRST decremented and
   // then written to, so its fine.
   pa = (uint64_t) kalloc();
-  create_mapping(pgdir, va, V2P(pa), PTE_W | PTE_U);
+  memset((void *) pa, 0, PGSIZE);
+  create_mapping(proc->pgdir, va, V2P(pa), PTE_W | PTE_U);
   sp = va + PGSIZE;
 
   proc->ucontext->rip = eh->entry;
   proc->ucontext->rsp = sp;
-  proc->ucontext->cs = UCODE | RPL_U;
-  proc->ucontext->ss = UDATA | RPL_U;
 
-  proc->pgdir = pgdir;
-  proc->sz = PGSIZE;
-  proc->state = RUNNABLE;
+  loadpgdir(kpgdir); // restore kernel page table
 }
