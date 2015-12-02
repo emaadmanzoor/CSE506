@@ -143,7 +143,6 @@ pte_t* setupkvm();
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
 void delete_mappings(pte_t* pml4);
 void loadpgdir(pte_t*);
-uint64_t physend;
 
 // string.c
 int strcmp(const char *, const char *);

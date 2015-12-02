@@ -58,7 +58,9 @@ void map_program_binary(char *path, struct proc* proc) {
     // copy data from ph->offset to ph->filesz
     // to virtual address starting at ph->vaddr 
     // create page table mappings along the way
-    proc->startva = ph->vaddr;
+    if (i = 0) {
+      proc->startva = ph->vaddr;
+    }
     for (va = ph->vaddr;
          va < ph->vaddr + ph->memsz;
          va += PGSIZE) {
