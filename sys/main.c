@@ -15,8 +15,6 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
     uint32_t type;
   }__attribute__((packed)) *smap;
 
-  //uint64_t physend = 0;
-
   while(modulep[0] != 0x9001) modulep += modulep[1]+2;
   for(smap = (struct smap_t*)(modulep+2); smap < (struct smap_t*)((char*)modulep+modulep[1]+2*4); ++smap) {
     if (smap->type == 1 /* memory */ && smap->length != 0) {
@@ -31,10 +29,12 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
 
   // kernel starts here
   kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
-  kpgdir = setupkvm(physend); // setup kernel page table mappings
+  kpgdir = setupkvm(); // setup kernel page table mappings
   loadpgdir(kpgdir);
+  
   clear_screen();
-  init_user_process( "bin/hello", physend );
+
+  init_user_process( "bin/init" );
   //init_user_process( "bin/world" );
 
   //hello_proc = alloc_proc();

@@ -1,7 +1,7 @@
 #include <sys/sbunix.h>
 #include <sys/asm.h>
 
-pte_t* setupkvm(uint64_t physend) {
+pte_t* setupkvm() {
   // page table management pointers
   pte_t *pml4;
   pte_t *pdpt, *pdt, *pt;
@@ -144,4 +144,8 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
   }
 
   *pte = pa | PTE_P | perm;
+}
+
+void delete_mappings(pte_t* pgdir) {
+  // TODO
 }
