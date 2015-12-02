@@ -12,6 +12,9 @@ void syscall(struct usercontext *f) {
     case SYS_exit:
       exit(f->rdi);
       break;
+    case SYS_fork:
+      fork();
+      break;
     case SYS_execve:
       exec((char*) f->rdi, (char**) f->rsi, (char**) f->rdx);
       break;

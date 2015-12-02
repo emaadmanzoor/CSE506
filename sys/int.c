@@ -6,11 +6,14 @@ static uint32_t ticks;
 static uint32_t secs; // seconds since boot
 
 void pitintr() {
+  //int free_pages;
   ticks++;
   if (ticks == TICKS_PER_SEC) {
     ticks = 0;
     secs++;
     printat(CLOCK_X, CLOCK_Y, 1, secs);
+    //free_pages = num_free_pages();
+    //printat(0, 24, 1, free_pages );
   }
   eoi(IRQ_PIT);
 }

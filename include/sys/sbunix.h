@@ -129,11 +129,13 @@ void eoi(int irq);
 // print.c
 void printf( const char *fmt, ...);
 void printat( int x, int y, int type, int val );
+void clear_screen();
 
 // kmem.c
 void kfree_range(uint64_t vstart, uint64_t vend);
 void kfree(char *v);
 char *kalloc();
+int num_free_pages();
 
 // vm.c
 uint64_t physend; // last available physical address
@@ -196,6 +198,8 @@ void init_user_process( char* );
 void scheduler();
 void yield();
 void exit(int);
+int fork();
+void freepgdir( pte_t*, uint64_t, uint64_t);
 int exec(char*, char**, char**);
 // global kernel page tables
 pte_t* kpgdir;

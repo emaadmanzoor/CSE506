@@ -31,6 +31,8 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
   kfree_range(P2V(physfree), P2V(physend)); // init page frame allocator
   kpgdir = setupkvm(); // setup kernel page table mappings
   loadpgdir(kpgdir);
+  
+  clear_screen();
 
   init_user_process( "bin/init" );
   //init_user_process( "bin/world" );
