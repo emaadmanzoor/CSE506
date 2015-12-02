@@ -50,17 +50,16 @@ struct proc *alloc_proc() {
   return p;
 }
 
-void init_user_process( char *path ) {
-  struct proc* p = alloc_proc(); // allocate and place in ptable
-  p->pgdir = setupkvm(); // install kernel mappings
-  map_program_binary( path, p ); // install user mappings
-  p->ucontext->rdi = 0; // argc
-  p->ucontext->rsi = 0; // argv = NULL
-  p->ucontext->rdx = 0; // envp = NULL
-  p->ucontext->cs = UCODE | RPL_U;
-  p->ucontext->ss = UDATA | RPL_U;
-  p->ucontext->rflags = IF;
-  p->state = RUNNABLE;
+void init_user_process(char *path) {
+  char *argv[1] = {NULL};
+  char *envp[1] = {NULL};
+  current_proc = alloc_proc(); // allocate kstack and place in ptable
+  current_proc->pgdir = NULL; // allocated by exec
+  current_proc->ucontext->cs = UCODE | RPL_U;
+  current_proc->ucontext->ss = UDATA | RPL_U;
+  current_proc->ucontext->rflags = IF;
+  current_proc->state = RUNNABLE;
+  exec(path, argv, envp);
 }
 
 void switch_user_process( struct proc* proc ) {
@@ -209,8 +208,8 @@ void freepgdir( pte_t* pgdir, uint64_t start, uint64_t end ) {
 } 
 
 int exec(char* path, char* argv[], char* envp[]) {
-  uint64_t i, p, argc, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
-  int len, size, argvsize, envpsize;
+  uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
+  int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
   struct progheader *ph;
   pte_t *oldpgdir, *newpgdir;
@@ -229,6 +228,10 @@ int exec(char* path, char* argv[], char* envp[]) {
 
     if (ph->type != ELF_LOAD) {
       continue;
+    }
+
+    if (i == 0) {
+      current_proc->startva = ph->vaddr;
     }
 
     // copy data from ph->offset to ph->filesz
@@ -258,9 +261,10 @@ int exec(char* path, char* argv[], char* envp[]) {
   // then written to, so its fine.
   pa = V2P(kalloc());
   create_mapping(newpgdir, va, pa, PTE_W | PTE_U);
-  current_proc->ucontext->rsp = va + PGSIZE;
-  sp2 = current_proc->ucontext->rsp; // this is a va in the new pagedir
   sp = P2V(pa) + PGSIZE; // this is a va in the current pagedir
+  sp2 = va + PGSIZE; // this is a va in the new pagedir
+  current_proc->ucontext->rsp = sp2;
+  current_proc->endva = sp2;
 
   // copy the argv and envp strings to the target process'
   // user stack, because once the old process is deleted, its

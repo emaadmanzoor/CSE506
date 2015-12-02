@@ -36,6 +36,7 @@ struct elfheader *get_elf_header(char *path) {
   return NULL;
 }
 
+// OBSOLETE! (unmaintained code since our kernel changed)
 // map the program pointed to by the ELF to the
 // given page table
 void map_program_binary(char *path, struct proc* proc) {
@@ -58,7 +59,7 @@ void map_program_binary(char *path, struct proc* proc) {
     // copy data from ph->offset to ph->filesz
     // to virtual address starting at ph->vaddr 
     // create page table mappings along the way
-    if (i = 0) {
+    if (i == 0) {
       proc->startva = ph->vaddr;
     }
     for (va = ph->vaddr;
