@@ -129,16 +129,19 @@ void eoi(int irq);
 // print.c
 void printf( const char *fmt, ...);
 void printat( int x, int y, int type, int val );
+void clear_screen();
 
 // kmem.c
 void kfree_range(uint64_t vstart, uint64_t vend);
 void kfree(char *v);
 char *kalloc();
+int num_free_pages();
 
 // vm.c
 pte_t* setupkvm(uint64_t physend);
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
 void loadpgdir(pte_t*);
+uint64_t physend;
 
 // string.c
 int strcmp(const char *, const char *);
@@ -194,6 +197,8 @@ void init_user_process( char*, uint64_t );
 void scheduler();
 void yield();
 void exit(int);
+int fork();
+void freepgdir( pte_t*, uint64_t, uint64_t);
 // global kernel page tables
 pte_t* kpgdir;
 #endif

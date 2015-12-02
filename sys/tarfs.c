@@ -58,6 +58,7 @@ void map_program_binary(char *path, struct proc* proc) {
     // copy data from ph->offset to ph->filesz
     // to virtual address starting at ph->vaddr 
     // create page table mappings along the way
+    proc->startva = ph->vaddr;
     for (va = ph->vaddr;
          va < ph->vaddr + ph->memsz;
          va += PGSIZE) {
@@ -84,7 +85,7 @@ void map_program_binary(char *path, struct proc* proc) {
   memset((void *) pa, 0, PGSIZE);
   create_mapping(proc->pgdir, va, V2P(pa), PTE_W | PTE_U);
   sp = va + PGSIZE;
-
+  proc->endva = sp;
   proc->ucontext->rip = eh->entry;
   proc->ucontext->rsp = sp;
 

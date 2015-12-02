@@ -31,7 +31,7 @@ void scroll() {
   if ( y_pos >= 24 ) {
     // copying data into buffer
     for ( bytes_copied=0; bytes_copied < SCROLL_BYTES_COPIED; bytes_copied++ ) {
-      *temp = *( (uint16_t*) VIDEO_MEM_ADDR + 80 + bytes_copied );
+      *temp = *( (uint16_t*) VIDEO_MEM_ADDR + display_width + bytes_copied );
       temp++;
     }
     // Copy data back on the screen and decrement the y_pos
@@ -43,8 +43,8 @@ void scroll() {
     }    
     y_pos--;
     // Clearing the last line
-    temp = ( (uint16_t*) VIDEO_MEM_ADDR + 80*23 );
-    for(i=0;i<80;i++) {
+    temp = ( (uint16_t*) VIDEO_MEM_ADDR + display_width*(display_height -2));
+    for( i = 0; i < display_height; i++ ) {
       *temp = 0x20;
       temp++;
     }
@@ -143,6 +143,17 @@ void printf( const char *str, ... ) {
     }
   }
   va_end( valist );
+}
+
+void clear_screen() {
+  uint16_t *temp;
+  int i;
+  for ( i = 0; i<display_width*display_height; i++ ) {
+    temp = (uint16_t*) VIDEO_MEM_ADDR + i;
+    *temp = 0x20;
+  }
+  y_pos = 0;
+  x_pos = 0;
 }
 
 /*

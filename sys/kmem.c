@@ -3,7 +3,7 @@
 struct pageframe {
   struct pageframe* next;
 };
-struct pageframe *freelist;
+struct pageframe *freelist = NULL;
 
 // free pages in range [vstart, vend)
 void kfree_range(uint64_t vstart, uint64_t vend) {
@@ -24,6 +24,17 @@ void kfree(char *v) {
   pf = (struct pageframe*) v;
   pf->next = freelist;
   freelist = pf;
+}
+
+int num_free_pages() {
+  int count = 0;
+  struct pageframe *pf;
+  pf = freelist;
+  while( pf ) {
+    count++;
+    pf = pf->next;
+  }
+  return count;
 }
 
 char *kalloc() {
