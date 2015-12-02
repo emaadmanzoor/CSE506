@@ -72,6 +72,7 @@ void scheduler() {
   struct proc* p;
   for( ; ; ) {
     for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
+      printf( "In the scheduler\n" );
       if(p->state != RUNNABLE)
         continue;
       //if (first) {
@@ -82,6 +83,7 @@ void scheduler() {
         loadpgdir( p->pgdir );
         //jump_to_user( p->ucontext->rip, p->ucontext->rsp,
         //              p->ucontext->cs, p->ucontext->ss, IF );
+	printf( "Switching to process pid %d\n", p->pid );
         swtch( &kcontext, p->kcontext );
       //}
     }

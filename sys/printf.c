@@ -8,20 +8,58 @@
 int display_width = 80;
 int display_height = 25;
 
+//#define SCROLL_BUFFER_PTR P2V( 0xB8000 + display_width )
+#define SCROLL_BYTES_COPIED 80*23
 /*
  * x and y coordinate of the cursor currently
  */
 int x_pos = 0;
 int y_pos = 0;
 
+/*
+ * Buffer to hold screen contents in
+ */
+uint16_t screen_buf[23*80];
+
+void scroll() {
+  uint16_t *temp;
+  uint16_t* loc;
+  int bytes_copied = 0;
+  int i;
+
+  temp = screen_buf;
+  if ( y_pos >= 24 ) {
+    // copying data into buffer
+    for ( bytes_copied=0; bytes_copied < SCROLL_BYTES_COPIED; bytes_copied++ ) {
+      *temp = *( (uint16_t*) VIDEO_MEM_ADDR + 80 + bytes_copied );
+      temp++;
+    }
+    // Copy data back on the screen and decrement the y_pos
+    temp = screen_buf;
+    for ( bytes_copied=0; bytes_copied < SCROLL_BYTES_COPIED; bytes_copied++ ) {
+      loc = ( (uint16_t*) VIDEO_MEM_ADDR + bytes_copied );
+      *loc = *temp;
+      temp++;
+    }    
+    y_pos--;
+    // Clearing the last line
+    temp = ( (uint16_t*) VIDEO_MEM_ADDR + 80*23 );
+    for(i=0;i<80;i++) {
+      *temp = 0x20;
+      temp++;
+    }
+  }
+  
+}
+
 void putchar( char c ) {
-  unsigned short *location;
-  location = (unsigned short*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
+  uint16_t *location;
+  location = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
 
   if ( c == '\n' ) {
     x_pos = 0;
     y_pos++;
-    
+    scroll();    
   } else {
     *location = c;
     x_pos++;
@@ -34,7 +72,6 @@ void putchar( char c ) {
     x_pos = 0;
     y_pos++;
   }
-
 }
 
 void putint( int intgr, int base ) {
