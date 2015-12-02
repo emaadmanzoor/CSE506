@@ -136,8 +136,10 @@ void kfree(char *v);
 char *kalloc();
 
 // vm.c
-pte_t* setupkvm(uint64_t physend);
+uint64_t physend; // last available physical address
+pte_t* setupkvm();
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
+void delete_mappings(pte_t* pml4);
 void loadpgdir(pte_t*);
 
 // string.c
@@ -190,10 +192,11 @@ void syscall(struct usercontext *);
 
 // proc.c
 struct proc* alloc_proc();
-void init_user_process( char*, uint64_t );
+void init_user_process( char* );
 void scheduler();
 void yield();
 void exit(int);
+int exec(char*, char**, char**);
 // global kernel page tables
 pte_t* kpgdir;
 #endif
