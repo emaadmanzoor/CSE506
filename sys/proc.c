@@ -85,8 +85,10 @@ void scheduler() {
       // kernel mappings.
       loadpgdir(kpgdir);
       if (current_proc->killed) {
-	freepgdir( current_proc->pgdir, current_proc->startva, current_proc->endva );
-	current_proc->state = ZOMBIE;
+        delete_pages(current_proc->pgdir, current_proc->startva, current_proc->endva);
+        delete_pages(current_proc->pgdir, current_proc->stackbottom, current_proc->stacktop);
+        freepgdir(current_proc->pgdir);
+        current_proc->state = ZOMBIE;
       }
       current_proc = 0;
     }
@@ -105,7 +107,8 @@ void exit(int status) {
   swtch( &(current_proc->kcontext), kcontext );
 }
 
-uint64_t get_mapping( pte_t* pgdir, uint64_t va ) {
+// gets a pointer to a PT entry for va
+pte_t *get_mapping(pte_t *pgdir, uint64_t va) {
   pte_t *pdpt, *pdt, *pt;
   pte_t *pml4e, *pdpte, *pde, *pte;
 
@@ -124,39 +127,47 @@ uint64_t get_mapping( pte_t* pgdir, uint64_t va ) {
   pte = &pt[PT_INDEX(va)];
   if (!(*pte & PTE_P))
     return 0;
-  return (uint64_t)(*pte & ~(0xfff)); // returning the physical address
+  return pte;
 }
 /*
- * Return a copy of the current process's page tables
+ * Copy page tables
  */
-pte_t* copypgdir( pte_t* pgdir, uint64_t start, uint64_t end ) {
-  pte_t* new_pgdir = setupkvm( physend );
+void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
+                 uint64_t start, uint64_t end ) {
   uint64_t va, pa, pa_new;
-  int i;
-  // both start an end are page aligned, but for fun:
-  for ( va = ALIGNDN(start); va < end; va+=PGSIZE ) {
-    pa = get_mapping( pgdir, va );
-    if (!pa) // did not find a mapping
-      continue;
+  pte_t *pte;
 
-    pa_new = (uint64_t) kalloc();
-    memset( (void*)pa_new, 0, PGSIZE);
-    for( i=0; i<PGSIZE; i++ ) {
-      *((char*)pa_new + i) = *((char*)va + i);
+  // start, end are page aligned
+  for ( va = start; va < end; va+=PGSIZE ) {
+    pte = get_mapping(srcpgdir, va);
+
+    if (!(*pte & PTE_P)) {
+      // page not mapped
+      continue;
     }
-    create_mapping( new_pgdir, va, V2P(pa_new), PTE_W | PTE_U );
+
+    pa = P2V(*pte & ~(0xfff)); // page physical address
+    pa_new = (uint64_t) kalloc();
+    memcpy((char*) pa_new, (char*) pa, PGSIZE);
+
+    create_mapping(destpgdir, va, V2P(pa_new), PTE_W | PTE_U );
   }
-  return new_pgdir;
 }
 
 int fork() {
   struct proc* p;
   // deep copy the current process's page tables
   p = alloc_proc();
-  p->pgdir = copypgdir( current_proc->pgdir, current_proc->startva, current_proc->endva );
+  p->pgdir = setupkvm();
+  copypgdir(p->pgdir, current_proc->pgdir,
+            current_proc->startva, current_proc->endva);
+  copypgdir(p->pgdir, current_proc->pgdir,
+            current_proc->stackbottom, current_proc->stacktop);
   p->parent = current_proc;
   p->startva = current_proc->startva;
   p->endva = current_proc->endva;
+  p->stackbottom = current_proc->stackbottom;
+  p->stacktop = current_proc->stacktop;
   /*
    * IMPORTANT: want to execute the child process at the exact same place as the parent
    * so copy all the user context (includes rip)
@@ -170,45 +181,59 @@ int fork() {
   return p->pid;
 }
 
-void freepgdir( pte_t* pgdir, uint64_t start, uint64_t end ) {
+// deletes the pages and the mapping
+void delete_pages(pte_t* pgdir, uint64_t start, uint64_t end) {
   uint64_t va, pa;
-  int i, j, k;
-  pte_t *pdpt, *pdt, *pt;
-  int free_pages;
-  free_pages = num_free_pages();
-  printf("%d\n", free_pages);
-  // free the actual pages
-  for ( va = ALIGNDN(start); va < end; va+=PGSIZE ) {
-    pa = get_mapping( pgdir, va );
-    if (!pa) // did not find a mapping
+  pte_t *pte;
+  for (va = ALIGNDN(start); va < end; va+=PGSIZE) {
+    pte = get_mapping(pgdir, va);
+
+    if (!(*pte & PTE_P)) {
+      // page not mapped
       continue;
+    }
+
+    pa = (uint64_t)(*pte & ~(0xfff)); // page physical address
+    *pte = 0; // delete the mapping
     kfree((char*)P2V(pa));
   }
+}
+
+// delete the page tables
+void freepgdir(pte_t* pgdir) {
+  int i, j, k;
+  pte_t *pdpt, *pdt, *pt;
+  //uint64_t va, pa;
+  //int free_pages;
+  //free_pages = num_free_pages();
+  //printf("%d\n", free_pages);
+  //delete_pages(pgdir, start, end);
 
   // free the page table
   for( i=0; i<512; i++ ) {
     if (pgdir[i] & PTE_P) {
       pdpt = (pte_t*) P2V(pgdir[i] & ~(0xfff));
       for( j=0; j<512; j++) {
-	if(pdpt[j] & PTE_P) {
-	  pdt = (pte_t*) P2V(pdpt[j] & ~(0xfff));
-	  for(k=0; k<512; k++) {
-	    if( pdt[k] & PTE_P) {
-	      pt = (pte_t*) P2V(pdt[k] & ~(0xfff));
-	      kfree((char*)(pt));
-	    }
-	  }
-	  kfree((char*)(pdt));
-	}
+        if(pdpt[j] & PTE_P) {
+          pdt = (pte_t*) P2V(pdpt[j] & ~(0xfff));
+          for(k=0; k<512; k++) {
+            if( pdt[k] & PTE_P) {
+              pt = (pte_t*) P2V(pdt[k] & ~(0xfff));
+              kfree((char*)(pt));
+            }
+          }
+          kfree((char*)(pdt));
+        }
       }
       kfree((char*)(pdpt));
     }
   }
   kfree((char*)(pgdir));
-} 
+}
 
 int exec(char* path, char* argv[], char* envp[]) {
   uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
+  uint64_t oldstartva, oldendva, oldstackbottom, oldstacktop;
   int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
   struct progheader *ph;
@@ -222,6 +247,14 @@ int exec(char* path, char* argv[], char* envp[]) {
   ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   current_proc->ucontext->rip = eh->entry;
 
+  // save these to free their pages later
+  oldstartva = current_proc->startva;
+  oldendva = current_proc->endva;
+  oldstackbottom = current_proc->stackbottom;
+  oldstacktop = current_proc->stacktop;
+
+  current_proc->startva = -1;  // 0x000 unsigned min
+  current_proc->endva = 0;   // 0xfff unsigned max
   for (i = 0; i < eh->phnum; i++, ph++) {
     // iteration for each program header in the ELF
     // each ELF contains a TEXT and DATA segment
@@ -230,8 +263,12 @@ int exec(char* path, char* argv[], char* envp[]) {
       continue;
     }
 
-    if (i == 0) {
+    if (ph->vaddr <= current_proc->startva) {
       current_proc->startva = ph->vaddr;
+    }
+
+    if (ALIGNUP(ph->vaddr + ph->memsz) >= current_proc->endva) {
+      current_proc->endva = ALIGNUP(ph->vaddr + ph->memsz);
     }
 
     // copy data from ph->offset to ph->filesz
@@ -252,19 +289,19 @@ int exec(char* path, char* argv[], char* envp[]) {
     }
   }
 
-  // now va > ph->vaddr + ph->memsz, the last va
-  // and va is page-aligned. place the stack in this page
-  // (from the last va to last va + PGSIZE)
-  //
+  // Place the stack to grow downwards from KERNBASE
   // The stack address at this point is unmapped; however,
   // on a stack push, the pointer is FIRST decremented and
-  // then written to, so its fine.
+  // then written to, so it's fine.
   pa = V2P(kalloc());
-  create_mapping(newpgdir, va, pa, PTE_W | PTE_U);
+  create_mapping(newpgdir, KERNBASE - PGSIZE, pa, PTE_W | PTE_U);
   sp = P2V(pa) + PGSIZE; // this is a va in the current pagedir
-  sp2 = va + PGSIZE; // this is a va in the new pagedir
+  sp2 = KERNBASE; // this is a va in the new pagedir
   current_proc->ucontext->rsp = sp2;
-  current_proc->endva = sp2;
+
+  // for auto-growing stacks (stacktop = KERNBASE)
+  current_proc->stackbottom = KERNBASE - PGSIZE;
+  current_proc->stacktop = KERNBASE;
 
   // copy the argv and envp strings to the target process'
   // user stack, because once the old process is deleted, its
@@ -292,7 +329,7 @@ int exec(char* path, char* argv[], char* envp[]) {
 
   /* Structure of the stack
    *
-   *  ----------------  <-- TOP (0x402000)
+   *  ----------------  <-- TOP (KERNBASE)
    *  |     ...      |
    *  ----------------  argvsize bytes (8-byte multiple)
    *  |     ...      |
@@ -351,7 +388,13 @@ int exec(char* path, char* argv[], char* envp[]) {
   oldpgdir = current_proc->pgdir;
   current_proc->pgdir = newpgdir;
   loadpgdir(current_proc->pgdir);
-  delete_mappings(oldpgdir);
+
+  if (oldpgdir == NULL) // first process
+    return 0;
+
+  delete_pages(oldpgdir, oldstartva, oldendva);
+  delete_pages(oldpgdir, oldstackbottom, oldstacktop);
+  freepgdir(oldpgdir);
 
   return 0;
 }

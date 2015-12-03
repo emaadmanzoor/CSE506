@@ -41,3 +41,10 @@ void memset(void *b, char c, int len) {
     len--;
   }
 }
+
+void memcpy(char *dest, char *src, int len) {
+  int i;
+  for (i = 0; i < len; i++) {
+    *(dest + i) = *(src + i);
+  }
+}
