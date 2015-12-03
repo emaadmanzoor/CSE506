@@ -207,6 +207,7 @@ void freepgdir(pte_t*);
 void copypgdir(pte_t*, pte_t*, uint64_t, uint64_t);
 void delete_pages(pte_t*, uint64_t, uint64_t);
 int exec(char*, char**, char**);
+uint64_t growproc(uint64_t newvend);
 // global kernel page tables
 pte_t* kpgdir;
 #endif

@@ -398,3 +398,34 @@ int exec(char* path, char* argv[], char* envp[]) {
 
   return 0;
 }
+
+uint64_t growproc(uint64_t newendva) {
+  int inc, incpages, i, fail = 0;
+  uint64_t pa, va;
+
+  if (newendva <= current_proc->endva) {
+    return current_proc->endva;
+  }
+
+  inc = newendva - current_proc->endva; // increase in size in bytes
+  incpages = (inc + PGSIZE - 1) / PGSIZE; // in pages
+
+  va = current_proc->endva;
+  for (i = 0; i < incpages; i++) {
+    pa = (uint64_t) kalloc();
+    if (pa == 0) {
+      fail = 1;
+      break;
+    }
+    create_mapping(current_proc->pgdir, va, V2P(pa), PTE_W | PTE_U);
+    va += PGSIZE;
+  }
+
+  if (fail) {
+    // unmap pages mapped so far
+    delete_pages(current_proc->pgdir, current_proc->endva, va);
+  }
+
+  current_proc->endva = va;
+  return current_proc->endva;
+}
