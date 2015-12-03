@@ -57,4 +57,11 @@ static __inline void lcr3( uint64_t val)
 {
   __asm__ __volatile__("movq %0, %%cr3" : : "r" (val));
 }
+
+static __inline uint64_t rcr2()
+{
+  uint64_t address;
+  __asm__ __volatile__("movq %%cr2, %0" : "=r" (address));
+  return address;
+}
 #endif

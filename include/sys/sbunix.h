@@ -158,6 +158,10 @@ void memset(void *b, char c, int len);
 void memcpy(char *, char *, int);
 
 // syscall.c
+#define   PF_PR    0x1   // page protection, 0 = not present
+#define   PF_RW    0x2   // 0 = read, 1 = write
+#define   PF_US    0x4   // 0 = supervisor, 1 = user
+
 struct usercontext {
   // 4. pushed by the generic handler
   uint64_t r15;

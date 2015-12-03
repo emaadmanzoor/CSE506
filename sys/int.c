@@ -1,6 +1,7 @@
 #include <sys/sbunix.h>
 #include <sys/asm.h>
 #include <sys/key_map.h>
+#include <sys/proc.h>
 
 static uint32_t ticks;
 static uint32_t secs; // seconds since boot
@@ -44,6 +45,34 @@ void kbdintr() {
   printat( CHAR_X, CHAR_Y, 0, c );
 }
 
+void pagefault(uint32_t errcode, uint64_t rip) {
+  uint64_t pfa = rcr2();
+  printf("PAGEFAULT @%d: 0x%d |", rip, pfa);
+
+  if (errcode & PF_PR) {
+    printf(" BADPERM |");
+  } else {
+    printf(" NOTPRES |");
+  }
+
+  if (errcode & PF_US) {
+    printf(" USER (KILLED)|");
+  } else {
+    printf(" KERN |");
+  }
+
+  if (errcode & PF_RW) {
+    printf(" WR\n");
+  } else {
+    printf(" RD\n");
+  }
+
+  if (errcode & PF_US) {
+    current_proc->killed = 1;
+    yield();
+  }
+}
+
 void interrupt_handler(struct usercontext* f) {
   switch (f->intno) {
     case N_PIT:
@@ -54,6 +83,10 @@ void interrupt_handler(struct usercontext* f) {
       break;
     case N_SYSCALL:
       syscall(f);
+      break;
+    case N_PF:
+      pagefault(f->errcode, f->rip);
+      break;
     default:
       break; 
   }
