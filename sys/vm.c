@@ -35,7 +35,7 @@ pte_t* setupkvm() {
       }
 
       memset(pdpt, 0, PGSIZE); // kalloc does this, but just to be sure
-      *pml4e = V2P(pdpt) | PTE_P | PTE_W;
+      *pml4e = V2P(pdpt) | PTE_P | PTE_U | PTE_W;
     }
 
     // Level 2. Map the PDT entry in PDPT
@@ -49,7 +49,7 @@ pte_t* setupkvm() {
       }
 
       memset(pdt, 0, PGSIZE); // kalloc does this, but just to tbe sure
-      *pdpte = V2P(pdt) | PTE_P | PTE_W;
+      *pdpte = V2P(pdt) | PTE_P | PTE_U | PTE_W;
     }
 
     // Level 3. Map the PT entry in PDT
@@ -63,7 +63,7 @@ pte_t* setupkvm() {
       }
 
       memset(pt, 0, PGSIZE); // kalloc does this, but just to be sure
-      *pde = V2P(pt) | PTE_P | PTE_W;
+      *pde = V2P(pt) | PTE_P | PTE_U | PTE_W;
     }
 
     // Level 4. Map the physical address in PT
@@ -105,7 +105,7 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
     }
 
     memset(pdpt, 0, PGSIZE); // kalloc does this, but just to be sure
-    *pml4e = V2P(pdpt) | PTE_P | perm;
+    *pml4e = V2P(pdpt) | PTE_P | PTE_U | PTE_W;
   }
 
   // Level 2. Map the PDT entry in PDPT
@@ -119,7 +119,7 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
     }
 
     memset(pdt, 0, PGSIZE); // kalloc does this, but just to tbe sure
-    *pdpte = V2P(pdt) | PTE_P | perm;
+    *pdpte = V2P(pdt) | PTE_P | PTE_U | PTE_W;
   }
 
   // Level 3. Map the PT entry in PDT
@@ -133,7 +133,7 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
     }
 
     memset(pt, 0, PGSIZE); // kalloc does this, but just to be sure
-    *pde = V2P(pt) | PTE_P | perm;
+    *pde = V2P(pt) | PTE_P | PTE_U | PTE_W;
   }
 
   // Level 4. Map the physical address in PT
