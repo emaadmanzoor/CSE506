@@ -141,7 +141,6 @@ int num_free_pages();
 uint64_t physend; // last available physical address
 pte_t* setupkvm();
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
-void delete_mappings(pte_t* pml4);
 void loadpgdir(pte_t*);
 
 // string.c
@@ -156,6 +155,7 @@ int octtodec(int);
 void panic(char *s);
 void jump_to_program(uint64_t entry, uint64_t sp);
 void memset(void *b, char c, int len);
+void memcpy(char *, char *, int);
 
 // syscall.c
 struct usercontext {
@@ -199,7 +199,9 @@ void scheduler();
 void yield();
 void exit(int);
 int fork();
-void freepgdir( pte_t*, uint64_t, uint64_t);
+void freepgdir(pte_t*);
+void copypgdir(pte_t*, pte_t*, uint64_t, uint64_t);
+void delete_pages(pte_t*, uint64_t, uint64_t);
 int exec(char*, char**, char**);
 // global kernel page tables
 pte_t* kpgdir;

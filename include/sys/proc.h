@@ -30,4 +30,6 @@ struct proc {
   char name[16];               // Process name (debugging)
   uint64_t startva;
   uint64_t endva;
+  uint64_t stackbottom;       // stacktop = KERNBASE
+  uint64_t stacktop;
 };
