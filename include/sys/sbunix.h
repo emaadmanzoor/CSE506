@@ -143,6 +143,7 @@ void printf( const char *fmt, ...);
 void printat( int x, int y, int type, int val );
 void putchar(char);
 void clear_screen();
+void clear_current_line();
 
 // kmem.c
 void kfree_range(uint64_t vstart, uint64_t vend);
