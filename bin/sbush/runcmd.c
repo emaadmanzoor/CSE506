@@ -10,10 +10,12 @@ void runcmd(const char* cmd, char *const args[], int argc) {
   char *search_path;
   char *full_cmd;
   const char* current_search_path;
+  char *envp[1] = { NULL };
 
   // first try running the command as is, in case
   // it is present in the current working directory
-  execve(cmd, args, NULL);
+  //printf("calling execve for cmd %s\n", cmd);
+  execve(cmd, args, envp);
 
   // then search on the PATH
   path_len = strlen(path);

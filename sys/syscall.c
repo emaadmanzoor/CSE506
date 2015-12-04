@@ -28,5 +28,14 @@ void syscall(struct usercontext *f) {
     case SYS_write:
       f->rax = write((int)f->rdi, (char*)f->rsi, (uint64_t)f->rdx);
       break;
+    case SYS_getpid:
+      f->rax = getpid();
+      break;
+    case SYS_getppid:
+      f->rax = getppid();
+      break;
+    case SYS_wait4:
+      f->rax = waitpid((int)f->rdi);
+      break;
   }
 }

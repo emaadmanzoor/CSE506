@@ -16,11 +16,19 @@ int write(int fd, char* buf, uint64_t n) {
       } else if (buf[i] == '%' && buf[i+1] == 'c') {
 	printf( buf, (char)n );
 	break;
-      } else {
-	printf( buf );
-	break;
       }
     }
+    if ( buf[ i ] == '\0' )
+      printf( buf );
+  }
+  return 0;
+}
+
+int hasnewline() {
+  int i;
+  for(i = 0; i < inputpos; i++) {
+    if (inputqueue[i] == '\n')
+      return 1;
   }
   return 0;
 }
@@ -31,21 +39,25 @@ int read(int fd, char* buf, int n) {
   inputpos = 0;
 
   if (fd == STDIN) {
-    for( i=0; i<200; i++)
+    for(i = 0; i < 200; i++)
       termbuf[ i ] = 0;
 
-    // wait it out, till the data is here
-    while ( inputpos < n ) {
+    // wait it out, till the data is here or the user entered newline
+    // cannot copying data because keyboard interrupts are interleaved with
+    // this function and inputpos increments are not always by 1
+    while (inputpos < n && !hasnewline()) {
     }
 
     // copying data into the buffer
-    for ( i=0; i<n; i++ ) {
+    for (i = 0; i < n; i++) {
+      if (inputqueue[i] == '\n')
+	break;
       termbuf[ i ] = inputqueue[ i ];
+      ret++;
     }
 
     for( i=0; i < n; i++ ) {
       *(buf + i) = termbuf[ i ];
-      ret++;
     }
     *(buf+i) = '\0';
     

@@ -29,5 +29,5 @@ int printf(const char *format, ...) {
       }
     }
   }
-  return 0;
+  return __syscall(SYS_write, 1, format, 0);
 }
