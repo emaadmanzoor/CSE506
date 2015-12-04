@@ -239,8 +239,11 @@ int exec(char* path, char* argv[], char* envp[]) {
   // map the binary into the new process page table
   // (this duplicates map_program_binary becase we need
   // to modify the stack of the new process)
-  newpgdir = setupkvm();
   eh = get_elf_header(path);
+  if (eh == NULL) { // file not found
+    return -1;
+  }
+
   ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   current_proc->ucontext->rip = eh->entry;
 
@@ -250,6 +253,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   oldstackbottom = current_proc->stackbottom;
   oldstacktop = current_proc->stacktop;
 
+  newpgdir = setupkvm();
   current_proc->startva = -1;  // 0x000 unsigned min
   current_proc->endva = 0;   // 0xfff unsigned max
   for (i = 0; i < eh->phnum; i++, ph++) {
