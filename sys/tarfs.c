@@ -5,23 +5,22 @@
 // observation
 //  after the last file in tarfs, there are
 //  21 empty blocks for some reason
-struct elfheader *get_elf_header(char *path) {
+struct posix_header_ustar *get_file(char *path) {
   char *p; // points to an address in tarfs
   struct posix_header_ustar* phu;
-  struct elfheader* eh;
   int size;
 
   p = &_binary_tarfs_start;
   while (p < &_binary_tarfs_end) {
     phu = (struct posix_header_ustar*) p;
-    p += sizeof(struct posix_header_ustar);
 
-    eh = (struct elfheader*) p;
     if (strcmp(path, phu->name) == 0) {
-      return eh;
+      return phu;
     }
 
     size = octtodec(atoi(phu->size));
+
+    p += sizeof(struct posix_header_ustar);
 
     if (size == 0) {
       // p already points to the next header address
@@ -30,10 +29,18 @@ struct elfheader *get_elf_header(char *path) {
 
     // the next file header will start at a 512-byte-aligned
     // address, so align the size up to 512 bytes
-    p += (size + (BLKSIZE - (size % BLKSIZE)));
+    size = ((size + BLKSIZE - 1)/BLKSIZE) * BLKSIZE;
+    p += size;
   }
 
   return NULL;
+}
+
+struct elfheader *get_elf_header(char *path) {
+  struct posix_header_ustar *phu = get_file(path);
+  if (phu == NULL)
+    return NULL;
+  return (struct elfheader *) ((char *) phu + sizeof(struct posix_header_ustar));
 }
 
 // OBSOLETE! (unmaintained code since our kernel changed)

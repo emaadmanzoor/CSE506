@@ -17,6 +17,7 @@ extern void handler_restore();
 struct proc *alloc_proc() {
   int found = 0;
   struct proc *p;
+  struct file *f;
   char *sp;
 
   for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
@@ -46,6 +47,12 @@ struct proc *alloc_proc() {
   sp -= sizeof(struct context);
   p->kcontext = (struct context *) sp;
   p->kcontext->rip = (uint64_t) &handler_restore;
+
+  for (f = p->files; f < &p->files[MAX_FILE]; f++) {
+    f->start_off = 0;
+    f->curr_off = 0;
+    f->sz = 0;
+  }
 
   return p;
 }
@@ -497,6 +504,40 @@ int expandstack() {
                  V2P(pa), PTE_W | PTE_U);
   current_proc->stackbottom -= PGSIZE;
   return 1;
+}
+
+int open(char *path) {
+  int i;
+  struct file *f;
+  struct posix_header_ustar *phu = get_file(path);
+
+  if (phu == NULL) {
+    return -1;
+  }
+
+  for (i = 2; i < MAX_FILE; i++) {
+    f = &current_proc->files[i];
+    if (f->sz == 0)
+      break;
+  }
+
+  if (i == MAX_FILE) {
+    return -1;
+  }
+
+  f->start_off = (char*) phu + sizeof(struct posix_header_ustar);
+  f->curr_off = f->start_off;
+  f->sz = octtodec(atoi(phu->size));
+
+  return i;
+}
+
+int close(int fd) {
+  struct file *f = &current_proc->files[fd];
+  f->start_off = 0;
+  f->curr_off = 0;
+  f->sz = 0;
+  return 0;
 }
 
 int ps(void) {
