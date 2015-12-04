@@ -2,5 +2,5 @@
 #include "syscall.h"
 
 pid_t getppid(void) {
-  return syscall_0(SYS_getppid);
+  return __syscall(SYS_getppid);
 }

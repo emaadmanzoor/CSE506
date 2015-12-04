@@ -400,3 +400,49 @@ int exec(char* path, char* argv[], char* envp[]) {
 
   return 0;
 }
+
+int getpid() {
+  return current_proc->pid;
+}
+
+int getppid() {
+  if (current_proc->pid == 1 ) {
+    return 0;
+  }
+  return current_proc->parent->pid;
+}
+
+int waitpid( int pid ) {
+  struct proc* p;
+  while( 1 ) {
+    for( p=ptable.proc; p < &ptable.proc[MAX_PROC]; p++ ) {
+      if ( p->pid == pid ) {
+	if( p->state == ZOMBIE ) {
+	  p->parent = 0;
+	  p->pid = 0;
+	  p->killed = 0;
+	  p->kstack = 0;
+	  return pid;
+	}
+      }
+    }
+    yield();
+  }
+  return -1;
+}
+
+int kill(int pid) {
+  struct proc* p;
+  for( p=ptable.proc; p < &ptable.proc[MAX_PROC]; p++ ) {
+    if (p->pid == pid) {
+      p->killed = 1;
+      return 0;
+    }
+  }
+  return -1;
+}
+
+int sleep(int pid) {
+  // TODO
+  return 0;
+}

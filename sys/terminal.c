@@ -16,11 +16,10 @@ int write(int fd, char* buf, uint64_t n) {
       } else if (buf[i] == '%' && buf[i+1] == 'c') {
 	printf( buf, (char)n );
 	break;
-      } else {
-	printf( buf );
-	break;
       }
     }
+    if ( buf[ i ] == '\0' )
+      printf( buf );
   }
   return 0;
 }
