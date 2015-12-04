@@ -6,6 +6,19 @@ int main(int argc, char* argv[], char* envp[]) {
   void *v = malloc(1);
   char buf[5];
   
+  __asm__("\
+      mov $1031, %r12 \n\
+      loop: \n\
+        push $0 \n\
+        dec %r12 \n\
+        jnz loop \n\
+      mov $1031, %r12 \n\
+      loop2: \n\
+        addq $8, %rsp \n\
+        dec %r12 \n\
+        jnz loop2 \n\
+  ");
+
   // Read from stdin:
   ret = read( 0, (char*)&buf[0], 5 );
   printf( "%s\n", buf );

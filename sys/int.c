@@ -55,6 +55,15 @@ void kbdintr() {
 
 void pagefault(uint32_t errcode, uint64_t rip) {
   uint64_t pfa = rcr2();
+
+  // check if this is the stack growing
+  if (pfa == current_proc->stackbottom - 8) {
+    if (expandstack() == 1) {
+      return;
+    }
+  }
+
+  // default pagefault handling code
   printf("PAGEFAULT @%d: 0x%d |", rip, pfa);
 
   if (errcode & PF_PR) {
@@ -64,7 +73,7 @@ void pagefault(uint32_t errcode, uint64_t rip) {
   }
 
   if (errcode & PF_US) {
-    printf(" USER (KILLED)|");
+    printf(" USER (KILLED) |");
   } else {
     printf(" KERN |");
   }

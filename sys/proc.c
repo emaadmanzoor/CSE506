@@ -62,11 +62,6 @@ void init_user_process(char *path) {
   exec(path, argv, envp);
 }
 
-void switch_user_process( struct proc* proc ) {
-  // load pgdir into cr3
-  // change tss.rsp0
-}
-
 void scheduler() {
   struct proc* p;
   //int free_pages;
@@ -434,4 +429,19 @@ uint64_t growproc(uint64_t newendva) {
 
   current_proc->endva = va;
   return current_proc->endva;
+}
+
+// add a new stack page from
+// current_proc->stackbottom - PGSIZE to
+// current_proc->stackbottom
+int expandstack() {
+  uint64_t pa;
+  if ((pa = (uint64_t) kalloc()) == 0) {
+    return 0;
+  }
+  create_mapping(current_proc->pgdir,
+                 current_proc->stackbottom - PGSIZE,
+                 V2P(pa), PTE_W | PTE_U);
+  current_proc->stackbottom -= PGSIZE;
+  return 1;
 }
