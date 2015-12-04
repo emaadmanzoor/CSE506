@@ -31,7 +31,6 @@ void kbdintr() {
     keycode = inb( KEY_DAT );
     if ( keycode ==  SHIFT1 || keycode == SHIFT2 )
       shiftpressed = 1;
-
     if( keycode < 0 ) {
       shiftpressed = 0;
       return;
@@ -42,7 +41,16 @@ void kbdintr() {
   } else {
     c = key_map[ (unsigned char) keycode ];
   }
-  printat( CHAR_X, CHAR_Y, 0, c );
+  if (c == '\b') {
+    inputpos--;
+    inputqueue[inputpos] = 0;
+    printf( "%c", c );
+  } else {
+    printf( "%c", c);
+    inputqueue[ inputpos ] = c;
+    inputpos++;
+  }
+  //printat( CHAR_X, CHAR_Y, 0, c );
 }
 
 void pagefault(uint32_t errcode, uint64_t rip) {

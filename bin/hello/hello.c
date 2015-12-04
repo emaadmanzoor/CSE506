@@ -2,8 +2,15 @@
 #include <stdio.h>
 
 int main(int argc, char* argv[], char* envp[]) {
-  int x, y;
+  int x, y, ret;
   void *v = malloc(1);
+  char buf[5];
+  
+  // Read from stdin:
+  ret = read( 0, (char*)&buf[0], 5 );
+  printf( "%s\n", buf );
+  printf( "%d\n", ret );
+  yield();
   *(char*) v = 0x42;
   x = fork();
   if (x == 0) {

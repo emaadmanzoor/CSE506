@@ -3,6 +3,16 @@
 
 #include <sys/defs.h>
 
+// Constants for the int.c
+char inputqueue[ 200 ];
+__volatile__ int inputpos;
+char outputqueue[ 200 ];
+int outputpos;
+
+// Constants for file descriptors
+#define STDIN 0
+#define STDOUT 1
+
 // key.c constants
 #define KEY_DAT 0x60
 #define KEY_STATUS 0x64
@@ -195,6 +205,8 @@ struct usercontext {
 };
 
 void syscall(struct usercontext *);
+int read( int, char*, int );
+int write( int, char*, uint64_t);
 
 // proc.c
 struct proc* alloc_proc();

@@ -1,7 +1,9 @@
 #include <sys/sbunix.h>
 #include <stdarg.h>
+#include <sys/asm.h>
 #define VIDEO_MEM_ADDR P2V(0xB8000)
 
+int NOT_UPDATE_MOUSE_PTR = 0;
 /*
  * The display is a matrix of 80 X 25
  */
@@ -20,6 +22,16 @@ int y_pos = 0;
  * Buffer to hold screen contents in
  */
 uint16_t screen_buf[23*80];
+void move_cursor() {
+  if (NOT_UPDATE_MOUSE_PTR)
+    return;
+  uint16_t l;
+  l = y_pos * 80 + x_pos;
+  outb(0x3D4, 14);
+  outb(0x3D5, l >> 8);
+  outb(0x3D4, 15);
+  outb(0x3D5, l);
+}
 
 void scroll() {
   uint16_t *temp;
@@ -54,12 +66,24 @@ void scroll() {
 
 void putchar( char c ) {
   uint16_t *location;
+  int i;
   location = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
 
   if ( c == '\n' ) {
+    // clear the characters in this line, ahead of the x_pos (prevents remnanats of the
+    // previous line)
+    for (i = x_pos; i<85; i++)
+      *((uint16_t*)VIDEO_MEM_ADDR + (display_width*y_pos + i)) = 0x20;
     x_pos = 0;
     y_pos++;
     scroll();    
+  } else if( c == 0x08 ) {
+    // blank space
+    if (x_pos != 0) {
+      x_pos--;
+      location = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
+      *location = ' ';
+    }
   } else {
     *location = c;
     x_pos++;
@@ -72,6 +96,7 @@ void putchar( char c ) {
     x_pos = 0;
     y_pos++;
   }
+  move_cursor();
 }
 
 void putint( int intgr, int base ) {
@@ -167,6 +192,7 @@ void printat( int x, int y, int type, int val ) {
   x_pos = x;
   y_pos_back_up = y_pos;
   y_pos = y;
+  NOT_UPDATE_MOUSE_PTR = 1;
   /*
    * Modify x_pos and y_pos, back up their values
    */
@@ -178,6 +204,7 @@ void printat( int x, int y, int type, int val ) {
   /*
    * Put the real values of x and y back
    */
+  NOT_UPDATE_MOUSE_PTR = 0;
   x_pos = x_pos_backup;
   y_pos = y_pos_back_up;
 }

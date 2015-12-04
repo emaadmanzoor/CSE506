@@ -69,6 +69,7 @@ void switch_user_process( struct proc* proc ) {
 
 void scheduler() {
   struct proc* p;
+  //int free_pages;
   while( 1 ) {
     for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
       if(p->state != RUNNABLE)
@@ -78,6 +79,7 @@ void scheduler() {
       p->state = RUNNING;
       current_proc = p;
       //free_pages = num_free_pages();
+      //printf( "Scheduler, free pages: %d\n", free_pages );
       printf( "Scheduler, pid: %d\n", current_proc->pid);
       swtch( &kcontext, p->kcontext );
       // Back in the kernel after executing the process
