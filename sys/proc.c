@@ -506,7 +506,6 @@ int expandstack() {
   return 1;
 }
 
-<<<<<<< HEAD
 int open(char *path) {
   int i;
   struct file *f;
