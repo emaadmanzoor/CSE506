@@ -224,6 +224,8 @@ int getppid();
 int waitpid(int);
 int kill(int);
 int sleep(int);
+uint64_t growproc(uint64_t newvend);
+int expandstack();
 // global kernel page tables
 pte_t* kpgdir;
 #endif

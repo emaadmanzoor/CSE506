@@ -62,11 +62,6 @@ void init_user_process(char *path) {
   exec(path, argv, envp);
 }
 
-void switch_user_process( struct proc* proc ) {
-  // load pgdir into cr3
-  // change tss.rsp0
-}
-
 void scheduler() {
   struct proc* p;
   //int free_pages;
@@ -143,7 +138,7 @@ void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
   for ( va = start; va < end; va+=PGSIZE ) {
     pte = get_mapping(srcpgdir, va);
 
-    if (!(*pte & PTE_P)) {
+    if (pte == 0) {
       // page not mapped
       continue;
     }
@@ -190,7 +185,7 @@ void delete_pages(pte_t* pgdir, uint64_t start, uint64_t end) {
   for (va = ALIGNDN(start); va < end; va+=PGSIZE) {
     pte = get_mapping(pgdir, va);
 
-    if (!(*pte & PTE_P)) {
+    if (pte == 0) {
       // page not mapped
       continue;
     }
@@ -235,7 +230,7 @@ void freepgdir(pte_t* pgdir) {
 
 int exec(char* path, char* argv[], char* envp[]) {
   uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
-  uint64_t oldstartva, oldendva, oldstackbottom, oldstacktop;
+  uint64_t phstartva, phendva, oldstartva, oldendva, oldstackbottom, oldstacktop;
   int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
   struct progheader *ph;
@@ -265,19 +260,22 @@ int exec(char* path, char* argv[], char* envp[]) {
       continue;
     }
 
-    if (ph->vaddr <= current_proc->startva) {
-      current_proc->startva = ph->vaddr;
+    phstartva = ALIGNDN(ph->vaddr);
+    phendva = ALIGNDN(ph->vaddr + ph->memsz) + PGSIZE;
+
+    if (phstartva <= current_proc->startva) {
+      current_proc->startva = phstartva;
     }
 
-    if (ALIGNUP(ph->vaddr + ph->memsz) >= current_proc->endva) {
-      current_proc->endva = ALIGNUP(ph->vaddr + ph->memsz);
+    if (phendva >= current_proc->endva) {
+      current_proc->endva = phendva;
     }
 
     // copy data from ph->offset to ph->filesz
     // to virtual address starting at ph->vaddr
     // create page table mappings along the way
-    for (va = ph->vaddr;
-         va < ph->vaddr + ph->memsz;
+    for (va = phstartva;
+         va < phendva;
          va += PGSIZE) {
       pa = V2P(kalloc());
       create_mapping(newpgdir, va, pa, PTE_W | PTE_U);
@@ -445,4 +443,51 @@ int kill(int pid) {
 int sleep(int pid) {
   // TODO
   return 0;
+}
+
+uint64_t growproc(uint64_t newendva) {
+  int inc, incpages, i, fail = 0;
+  uint64_t pa, va;
+
+  if (newendva <= current_proc->endva) {
+    return current_proc->endva;
+  }
+
+  inc = newendva - current_proc->endva; // increase in size in bytes
+  incpages = (inc + PGSIZE - 1) / PGSIZE; // in pages
+
+  va = current_proc->endva;
+  for (i = 0; i < incpages; i++) {
+    pa = (uint64_t) kalloc();
+    if (pa == 0) {
+      fail = 1;
+      break;
+    }
+    create_mapping(current_proc->pgdir, va, V2P(pa), PTE_W | PTE_U);
+    va += PGSIZE;
+  }
+
+  if (fail) {
+    // unmap pages mapped so far
+    delete_pages(current_proc->pgdir, current_proc->endva, va);
+    return current_proc->endva;
+  }
+
+  current_proc->endva = va;
+  return current_proc->endva;
+}
+
+// add a new stack page from
+// current_proc->stackbottom - PGSIZE to
+// current_proc->stackbottom
+int expandstack() {
+  uint64_t pa;
+  if ((pa = (uint64_t) kalloc()) == 0) {
+    return 0;
+  }
+  create_mapping(current_proc->pgdir,
+                 current_proc->stackbottom - PGSIZE,
+                 V2P(pa), PTE_W | PTE_U);
+  current_proc->stackbottom -= PGSIZE;
+  return 1;
 }

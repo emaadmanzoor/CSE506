@@ -18,6 +18,9 @@ void syscall(struct usercontext *f) {
     case SYS_execve:
       exec((char*) f->rdi, (char**) f->rsi, (char**) f->rdx);
       break;
+    case SYS_brk:
+      f->rax = growproc(f->rdi);
+      break;
     case SYS_read:
       // set the return value to the value returned by read
       f->rax = read((int)f->rdi, (char*)f->rsi, (int)f->rdx);

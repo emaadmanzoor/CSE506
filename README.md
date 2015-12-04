@@ -55,6 +55,7 @@ valgrind rootfs/bin/sbush --track-origins=yes --leak-check=full -v
 
 ```
 gdb -ex 'target remote localhost:9998' -ex 'break reload_gdt' -ex 'continue' ./kernel
+gdb -ex 'target remote localhost:9998' -ex 'set confirm off' -ex 'file rootfs/bin/hello' -ex 'b malloc' ./kernel
 ```
 
 ## Team
