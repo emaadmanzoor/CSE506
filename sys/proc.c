@@ -77,7 +77,7 @@ void scheduler() {
       current_proc = p;
       //free_pages = num_free_pages();
       //printf( "Scheduler, free pages: %d\n", free_pages );
-      printf( "Scheduler, pid: %d\n", current_proc->pid);
+      //printf( "Scheduler, pid: %d\n", current_proc->pid);
       swtch( &kcontext, p->kcontext );
       // Back in the kernel after executing the process
       // Don't think we need to switch to kernel's page tables since the process has

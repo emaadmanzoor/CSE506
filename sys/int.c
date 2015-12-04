@@ -13,6 +13,8 @@ void pitintr() {
     ticks = 0;
     secs++;
     printat(CLOCK_X, CLOCK_Y, 1, secs);
+    if (current_proc && current_proc->state == RUNNING)
+      yield();
     //free_pages = num_free_pages();
     //printat(0, 24, 1, free_pages );
   }
