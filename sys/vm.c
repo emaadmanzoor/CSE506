@@ -94,6 +94,11 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
   pte_t *pdpt, *pdt, *pt;
   pte_t *pml4e, *pdpte, *pde, *pte;
 
+  if ((va & 0xfff) != 0 || (pa & 0xfff) != 0) {
+    panic("create_mapping needs aligned pages\n");
+  }
+  //printf("Creating mapping %x -> %x\n", va, pa);
+
   // Level 1. Map the PDPT entry in PML4E
   pml4e = &pml4[PML4_INDEX(va)];
   if (*pml4e & PTE_P) {
@@ -144,8 +149,9 @@ void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm) {
   }
 
   *pte = pa | PTE_P | perm;
-}
 
-void delete_mappings(pte_t* pgdir) {
-  // TODO
+  // increase reference count if this is a user mapping
+  if (perm & PTE_U) {
+    incref(pa);
+  }
 }
