@@ -145,7 +145,7 @@ int main() {
     printf(ps1);
     printf(">");
 
-    gets( buf, MAX_BUF_SIZE );
+    read( 0, buf, MAX_BUF_SIZE );
     if( buf[ 0 ] == 0 )
       continue;
 
@@ -194,6 +194,7 @@ int main() {
     /*
      * handle executables
      */
+    printf( "calling fork\n" );
     pid = fork();
     if ( pid == 0 ) {
       /*
@@ -213,6 +214,7 @@ int main() {
         }
       } else {
         // running as a foreground command
+	printf( "in parent\n" );
         runcmd(cmd, args, argc);
       }
       // child should exit now
