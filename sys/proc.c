@@ -128,10 +128,12 @@ pte_t *get_mapping(pte_t *pgdir, uint64_t va) {
 }
 /*
  * Copy page tables
+ * NOTE: Pages are mapped as READ-ONLY COW
+ * in the destpgdir and srcpgdir
  */
 void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
                  uint64_t start, uint64_t end ) {
-  uint64_t va, pa, pa_new;
+  uint64_t va, pa;/*, pa_new;*/
   pte_t *pte;
 
   // start, end are page aligned
@@ -143,11 +145,17 @@ void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
       continue;
     }
 
-    pa = P2V(*pte & ~(0xfff)); // page physical address
-    pa_new = (uint64_t) kalloc();
-    memcpy((char*) pa_new, (char*) pa, PGSIZE);
+    pa = *pte & ~(0xfff);
+    //pa = P2V(*pte & ~(0xfff)); // page physical address
+    //pa_new = (uint64_t) kalloc();
+    //memcpy((char*) pa_new, (char*) pa, PGSIZE);
 
-    create_mapping(destpgdir, va, V2P(pa_new), PTE_W | PTE_U );
+    //create_mapping(destpgdir, va, V2P(pa_new), PTE_W | PTE_U );
+    create_mapping(destpgdir, va, pa, PTE_C | PTE_U);
+
+    // modify mapping in the srcpgdir to be PTE_C | PTE_U (read-only)
+    *pte = *pte & (~PTE_W); // clear the PTE_W bit
+    *pte = *pte | PTE_C; // set the PTE_C bit
   }
 }
 
@@ -191,8 +199,12 @@ void delete_pages(pte_t* pgdir, uint64_t start, uint64_t end) {
     }
 
     pa = (uint64_t)(*pte & ~(0xfff)); // page physical address
+    if (getref(pa) == 1) { // this is the only reference, free page
+      kfree((char*)P2V(pa));
+    }
+
+    decref(pa);
     *pte = 0; // delete the mapping
-    kfree((char*)P2V(pa));
   }
 }
 
