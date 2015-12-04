@@ -78,6 +78,8 @@ void pagefault(uint32_t errcode, uint64_t rip) {
   if (errcode & PF_US) {
     current_proc->killed = 1;
     yield();
+  } else {
+    panic("Kernel pagefault!\n");
   }
 }
 
