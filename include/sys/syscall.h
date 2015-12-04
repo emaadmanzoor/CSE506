@@ -24,5 +24,5 @@
 #define SYS_getdents   78
 #define SYS_kill       62
 #define SYS_yield       4
-
+#define SYS_ps        111
 #endif

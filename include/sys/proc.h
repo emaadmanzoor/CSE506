@@ -27,7 +27,7 @@ struct proc {
   int killed;                  // If non-zero, have been killed
   struct file files[MAX_FILE];
   //struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
+  char name[32];               // Process name (debugging)
   uint64_t startva;
   uint64_t endva;
   uint64_t stackbottom;       // stacktop = KERNBASE

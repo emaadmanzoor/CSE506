@@ -194,7 +194,6 @@ int main() {
     /*
      * handle executables
      */
-    printf( "calling fork\n" );
     pid = fork();
     if ( pid == 0 ) {
       /*
@@ -214,7 +213,6 @@ int main() {
         }
       } else {
         // running as a foreground command
-	printf( "in parent\n" );
         runcmd(cmd, args, argc);
       }
       // child should exit now
