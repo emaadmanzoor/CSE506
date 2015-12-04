@@ -1,4 +1,4 @@
-#define KSTACKSIZE 4096
+#include <sys/tarfs.h>
 
 struct context {
   uint64_t r15;
@@ -25,7 +25,7 @@ struct proc {
   struct usercontext *ucontext;        // Trap frame for current syscall
   struct context *kcontext;     // swtch() here to run process
   int killed;                  // If non-zero, have been killed
-  //struct file *ofile[NOFILE];  // Open files
+  struct file files[MAX_FILE];
   //struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
   uint64_t startva;

@@ -3,7 +3,7 @@
 #include "syscall.h"
 
 int close(int fd) {
-  int res = syscall_1(SYS_close, fd);
+  int res = __syscall(SYS_close, fd);
   if (res < 0) {
     //errno = -res;
     return -1;

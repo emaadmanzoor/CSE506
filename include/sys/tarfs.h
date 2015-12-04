@@ -72,6 +72,13 @@ struct progheader {
   uint64_t align;        // alignment for this section
 };
 
+struct file {
+  char *start_off; // address in tarfs
+  char *curr_off; // address in tarfs
+  uint64_t sz; // start_off + sz = max address of this file
+};
+
+struct posix_header_ustar *get_file(char *path);
 struct elfheader* get_elf_header(char *path);
 void map_program_binary(char *, struct proc *);
 
