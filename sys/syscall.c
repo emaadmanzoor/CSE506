@@ -37,5 +37,8 @@ void syscall(struct usercontext *f) {
     case SYS_wait4:
       f->rax = waitpid((int)f->rdi);
       break;
+    case SYS_ps:
+      f->rax = ps();
+      break;
   }
 }

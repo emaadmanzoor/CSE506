@@ -222,6 +222,7 @@ int exec(char*, char**, char**);
 int getpid();
 int getppid();
 int waitpid(int);
+int ps();
 int kill(int);
 int sleep(int);
 uint64_t growproc(uint64_t newvend);

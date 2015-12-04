@@ -55,6 +55,8 @@ void init_user_process(char *path) {
   char *envp[1] = {NULL};
   current_proc = alloc_proc(); // allocate kstack and place in ptable
   current_proc->pgdir = NULL; // allocated by exec
+  strcpy( current_proc->name, "init" );
+  current_proc->state = RUNNABLE;
   current_proc->ucontext->cs = UCODE | RPL_U;
   current_proc->ucontext->ss = UDATA | RPL_U;
   current_proc->ucontext->rflags = IF;
@@ -165,6 +167,7 @@ int fork() {
   p->endva = current_proc->endva;
   p->stackbottom = current_proc->stackbottom;
   p->stacktop = current_proc->stacktop;
+  strcpy( p->name, "fork-child" );
   /*
    * IMPORTANT: want to execute the child process at the exact same place as the parent
    * so copy all the user context (includes rip)
@@ -246,7 +249,7 @@ int exec(char* path, char* argv[], char* envp[]) {
 
   ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   current_proc->ucontext->rip = eh->entry;
-
+  strcpy(current_proc->name, path);
   // save these to free their pages later
   oldstartva = current_proc->startva;
   oldendva = current_proc->endva;
@@ -494,4 +497,15 @@ int expandstack() {
                  V2P(pa), PTE_W | PTE_U);
   current_proc->stackbottom -= PGSIZE;
   return 1;
+}
+
+int ps(void) {
+  struct proc* p;
+  printf( "Process table:\n" );
+  printf("PID      Name\n");
+  for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
+    if ( p->state != UNUSED && p->state != ZOMBIE )
+      printf("%d       %s\n", p->pid, p->name, p->state );
+  }
+  return 0;
 }

@@ -23,6 +23,7 @@ void yield(void);
 int execve(const char *filename, char *const argv[], char *const envp[]);
 pid_t waitpid(pid_t pid, int *status, int options);
 unsigned int sleep(unsigned int seconds);
+int ps();
 
 // signals
 typedef void (*sighandler_t)(int);
