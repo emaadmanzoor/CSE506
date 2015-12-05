@@ -66,17 +66,16 @@ void scroll() {
 
 void putchar( char c ) {
   uint16_t *location;
-  int i;
   location = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
-
   if ( c == '\n' ) {
     x_pos = 0;
     y_pos++;
     scroll();
     // clear the characters in this line, ahead of the x_pos (prevents remnanats of the
     // previous line)
-    for (i = x_pos; i<85; i++)
-      *((uint16_t*)VIDEO_MEM_ADDR + (display_width*y_pos + i)) = 0x20;
+    //for (i = x_pos; i<display_width; i++)
+    //*((uint16_t*)VIDEO_MEM_ADDR + (display_width*y_pos + i)) = 0x20;
+    clear_current_line();
   } else if( c == 0x08 ) {
     // blank space
     if (x_pos != 0) {

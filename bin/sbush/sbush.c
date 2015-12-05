@@ -142,7 +142,7 @@ int main() {
       cmd[ i ] = 0;
 
     // prompt
-    printf( "\n" );
+    //printf( "\n" );
     printf(ps1);
     printf(">");
 
