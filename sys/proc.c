@@ -471,6 +471,9 @@ int waitpid( int pid ) {
 
 int kill(int pid) {
   struct proc* p;
+  if (pid == 1) {
+    return -1;
+  }
   for( p=ptable.proc; p < &ptable.proc[MAX_PROC]; p++ ) {
     if (p->pid == pid) {
       p->killed = 1;
@@ -478,11 +481,6 @@ int kill(int pid) {
     }
   }
   return -1;
-}
-
-int sleep(int pid) {
-  // TODO
-  return 0;
 }
 
 uint64_t growproc(uint64_t newendva) {
@@ -586,5 +584,9 @@ int getcwd(char *buf, size_t size) {
   if (strlen(current_proc->cwd) + 1 > size)
     return -1;
   strcpy(buf, current_proc->cwd);
+  return 0;
+}
+
+int sleep(int t) {
   return 0;
 }

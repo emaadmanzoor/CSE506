@@ -28,6 +28,7 @@ void kbdintr() {
   char keycode = '\0';
   unsigned char status;
   static int shiftpressed = 0;
+  static int ctrlpressed = 0;
 
   eoi( IRQ_KEY );
   status = inb( KEY_STATUS );
@@ -36,16 +37,24 @@ void kbdintr() {
     if ( keycode ==  SHIFT1 || keycode == SHIFT2 ) {
       shiftpressed = 1;
       return;
+    } else if ( keycode == CTRL ) {
+      ctrlpressed = 1;
     }
     if( keycode < 0 ) {
       shiftpressed = 0;
+      ctrlpressed = 0;
       return;
     }
   }
   if ( shiftpressed ) {
     c = shift_key_map[ (unsigned char) keycode ];
+  } else if (ctrlpressed) {
+    if (keycode == '.') { // Ctrl+C
+      kill( current_proc->pid );
+    }
+    return;
   } else {
-    c = key_map[ (unsigned char) keycode ];
+  c = key_map[ (unsigned char) keycode ];
   }
   if (c == '\b') {
     if (inputpos != 0) {

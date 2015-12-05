@@ -4,6 +4,7 @@
 
 #define SHIFT1 0x2A
 #define SHIFT2 0x36
+#define CTRL 0x1D
 
 unsigned char key_map[128] =
   {

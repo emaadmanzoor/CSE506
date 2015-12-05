@@ -26,7 +26,7 @@ void start(uint32_t* modulep, void* physbase, void* physfree)
       physend = smap->base + smap->length;
     }
   }
-  printf("tarfs in [%p:%p]\n", &_binary_tarfs_start, &_binary_tarfs_end);
+  printf("tarfs in [%x:%x]\n", &_binary_tarfs_start, &_binary_tarfs_end);
 
   // kernel starts here
   meminit(); // init page frame allocator

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # CSE 506
 
 ## Essentials
@@ -66,3 +67,34 @@ qemu-system-x86_64 -curses -cdrom $USER.iso -drive id=disk,file=$USER.img,if=non
 
    * Rachee Singh (racsingh@cs.stonybrook.edu)
    * Emaad Ahmed Manzoor (emanzoor@cs.stonybrook.edu)
+=======
+------------
+CockroachOS 
+------------
+Group Members: Rachee Singh, Emaad Ahmed Manzoor
+
+--------
+Features
+--------
+* 64-bit, 4 level paging
+* Preemption of user processes
+* Copy On Write 
+* Auto-growing stack
+* SEGV handling
+* Round robin shceduler
+* Binaries for execution: kill, sleep, ls, ps, echo 
+* Background processes with "&"
+* Ctrl+C for kill
+
+-------
+Testing
+-------
+* The ps command prints all running/runnable/sleeping processes in the system.
+* "infinite" binary has an infinite loop. Execution of the binary can be used to test preemption. The process can
+  be placed in the background and can be killed using Ctrl-C (when in foreground).
+
+----------------
+Acknowledgements
+----------------
+* Some design principles were inspired from the 32-bit open-source OS, xv6.
+>>>>>>> Stashed changes
