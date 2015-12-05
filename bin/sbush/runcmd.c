@@ -51,7 +51,7 @@ void runcmd(const char* cmd, char *const args[], int argc) {
     //printf("Full command: %s\n", full_cmd);
 
     // execute the command
-    execve(full_cmd, args, NULL);
+    execve(full_cmd, args, envp);
 
     // command failed
     free(full_cmd);
