@@ -58,6 +58,10 @@ gdb -ex 'target remote localhost:9998' -ex 'break reload_gdt' -ex 'continue' ./k
 gdb -ex 'target remote localhost:9998' -ex 'set confirm off' -ex 'file rootfs/bin/hello' -ex 'b malloc' ./kernel
 ```
 
+```
+qemu-system-x86_64 -curses -cdrom $USER.iso -drive id=disk,file=$USER.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 -net nic -net user,hostfwd=tcp::10080-:80 -net user,hostfwd=tcp::10023-:23 --no-reboot -gdb tcp::9998
+```
+
 ## Team
 
    * Rachee Singh (racsingh@cs.stonybrook.edu)
