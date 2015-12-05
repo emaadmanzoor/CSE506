@@ -37,7 +37,7 @@ Features
 Acknowledgements
 ----------------
 
-   * The mechanism of setting up the first process stack was adopted from [xv6](https://pdos.csail.mit.edu/6.828/2014/xv6/book-rev8.pdf)(commentary on a 32-bit open-source OS).
+   * The mechanism of setting up the first process's stack was adopted from [xv6](https://pdos.csail.mit.edu/6.828/2014/xv6/book-rev8.pdf) (commentary on a 32-bit open-source OS).
    * User space `malloc` is based on the implementation in K&R's C Programming Language.
    * The interrupt handling mechanism (offloading to a generic handler) is based on the ideas from https://littleosbook.github.io/.
    * Referred standard resources have been cited inline with the code.
