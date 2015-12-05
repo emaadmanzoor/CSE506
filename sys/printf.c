@@ -133,7 +133,7 @@ void printf( const char *str, ... ) {
   int formatted = 0;
   //unsigned int *arg_ptr;
   int intgr;
-  uint64_t ptr;
+  //uint64_t ptr;
   va_list valist;
   char* str_buf;
 
