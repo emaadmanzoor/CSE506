@@ -8,7 +8,6 @@ extern __thread int errno;
 extern char **environ;
 
 void exit(int status);
-
 // memory
 void *malloc(size_t size);
 void free(void *ptr);

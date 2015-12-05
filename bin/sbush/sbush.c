@@ -134,6 +134,7 @@ int main() {
   strcpy(ps1, DEFAULT_PS1);
 
   while ( 1 ) {
+    background = 0;
     // initialise command/arg data structures
     for ( i = 0; i< MAX_BUF_SIZE; i++ )
       buf[ i ] = 0;

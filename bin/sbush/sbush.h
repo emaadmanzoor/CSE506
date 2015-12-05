@@ -2,7 +2,7 @@
 #define MAX_BUF_SIZE 200
 #define MAX_CMD_LEN 50
 #define MAX_ENV_VARS 2
-#define DEFAULT_PATH "/bin/:/usr/bin/"
+#define DEFAULT_PATH "bin/:/usr/bin/"
 #define DEFAULT_PS1 "sbush"
 #define SCREEN_HEIGHT 60
 

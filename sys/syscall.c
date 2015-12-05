@@ -40,5 +40,7 @@ void syscall(struct usercontext *f) {
     case SYS_ps:
       f->rax = ps();
       break;
+   case SYS_kill:
+     f->rax = kill((int)f->rdi);
   }
 }
