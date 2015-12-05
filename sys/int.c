@@ -71,7 +71,7 @@ void pagefault(uint32_t errcode, uint64_t rip) {
   }
 
   // default pagefault handling code
-  printf("PAGEFAULT @%d: 0x%d |", rip, pfa);
+  printf("PAGEFAULT @0x%x: 0x%x |", rip, pfa);
 
   if (errcode & PF_PR) {
     printf(" BADPERM |");

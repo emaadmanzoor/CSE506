@@ -109,8 +109,8 @@ void clear_current_line() {
   }
 }
 
-void putint( int intgr, int base ) {
-  char digits_space[] = "0123456789ABCDEF";
+void putint( uint64_t intgr, int base ) {
+  char digits_space[] = "0123456789abcdef";
   int num_digits = 0;
   char intbuf[ 26 ];
 
@@ -163,7 +163,7 @@ void printf( const char *str, ... ) {
         putchar( va_arg( valist, int ) );
 	formatted = 0;
       } else if ( str[ i ] == 'x' || str[ i ] == 'p' ) {
-	intgr = (long) va_arg( valist, int );
+	intgr = va_arg( valist, uint64_t);
 	putint( intgr, 16 );
 	formatted = 0;
       } else if ( str[ i ] == 's' ) {
