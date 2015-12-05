@@ -95,8 +95,18 @@ void putchar( char c ) {
   if ( x_pos > 80 ) {
     x_pos = 0;
     y_pos++;
+    clear_current_line();
   }
   move_cursor();
+}
+
+void clear_current_line() {
+  int i;
+  uint16_t *loc;
+  for(i = 0; i<display_width; i++) {
+    loc = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + i );
+    *loc = ' ';
+  }
 }
 
 void putint( int intgr, int base ) {
