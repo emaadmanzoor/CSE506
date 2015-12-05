@@ -93,6 +93,7 @@ void scheduler() {
       // kernel mappings.
       loadpgdir(kpgdir);
       if (current_proc->killed) {
+        //printf("process killed\n");
         delete_pages(current_proc->pgdir, current_proc->startva, current_proc->endva);
         delete_pages(current_proc->pgdir, current_proc->stackbottom, current_proc->stacktop);
         freepgdir(current_proc->pgdir);
@@ -139,10 +140,12 @@ pte_t *get_mapping(pte_t *pgdir, uint64_t va) {
 }
 /*
  * Copy page tables
+ * NOTE: Pages are mapped as READ-ONLY COW
+ * in the destpgdir and srcpgdir
  */
 void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
                  uint64_t start, uint64_t end ) {
-  uint64_t va, pa, pa_new;
+  uint64_t va, pa;/*, pa_new;*/
   pte_t *pte;
 
   // start, end are page aligned
@@ -154,16 +157,23 @@ void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
       continue;
     }
 
-    pa = P2V(*pte & ~(0xfff)); // page physical address
-    pa_new = (uint64_t) kalloc();
-    memcpy((char*) pa_new, (char*) pa, PGSIZE);
+    pa = *pte & ~(0xfff);
+    //pa = P2V(*pte & ~(0xfff)); // page physical address
+    //pa_new = (uint64_t) kalloc();
+    //memcpy((char*) pa_new, (char*) pa, PGSIZE);
 
-    create_mapping(destpgdir, va, V2P(pa_new), PTE_W | PTE_U );
+    //create_mapping(destpgdir, va, V2P(pa_new), PTE_W | PTE_U );
+    create_mapping(destpgdir, va, pa, PTE_C | PTE_U);
+
+    // modify mapping in the srcpgdir to be PTE_C | PTE_U (read-only)
+    *pte = *pte & (~PTE_W); // clear the PTE_W bit
+    *pte = *pte | PTE_C; // set the PTE_C bit
   }
 }
 
 int fork() {
   struct proc* p;
+  //printf("forking\n");
   // deep copy the current process's page tables
   p = alloc_proc();
   p->pgdir = setupkvm();
@@ -171,6 +181,8 @@ int fork() {
             current_proc->startva, current_proc->endva);
   copypgdir(p->pgdir, current_proc->pgdir,
             current_proc->stackbottom, current_proc->stacktop);
+  // refresh the tlb
+  loadpgdir(current_proc->pgdir);
   p->parent = current_proc;
   p->startva = current_proc->startva;
   p->endva = current_proc->endva;
@@ -204,8 +216,12 @@ void delete_pages(pte_t* pgdir, uint64_t start, uint64_t end) {
     }
 
     pa = (uint64_t)(*pte & ~(0xfff)); // page physical address
+    if (getref(pa) == 1) { // this is the only reference, free page
+      kfree((char*)P2V(pa));
+    }
+
+    decref(pa);
     *pte = 0; // delete the mapping
-    kfree((char*)P2V(pa));
   }
 }
 
@@ -250,6 +266,8 @@ int exec(char* path, char* argv[], char* envp[]) {
   struct progheader *ph;
   pte_t *oldpgdir, *newpgdir;
 
+  //printf("exec'ing\n");
+
   // map the binary into the new process page table
   // (this duplicates map_program_binary becase we need
   // to modify the stack of the new process)
@@ -270,6 +288,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   newpgdir = setupkvm();
   current_proc->startva = -1;  // 0x000 unsigned min
   current_proc->endva = 0;   // 0xfff unsigned max
+  //printf("creating code mappings\n");
   for (i = 0; i < eh->phnum; i++, ph++) {
     // iteration for each program header in the ELF
     // each ELF contains a TEXT and DATA segment
@@ -311,6 +330,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   // The stack address at this point is unmapped; however,
   // on a stack push, the pointer is FIRST decremented and
   // then written to, so it's fine.
+  //printf("creating stack mappings\n");
   pa = V2P(kalloc());
   create_mapping(newpgdir, KERNBASE - PGSIZE, pa, PTE_W | PTE_U);
   sp = P2V(pa) + PGSIZE; // this is a va in the current pagedir
@@ -420,6 +440,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   if (oldpgdir == NULL) // first process
     return 0;
 
+  //printf("deleting old mappings\n");
   delete_pages(oldpgdir, oldstartva, oldendva);
   delete_pages(oldpgdir, oldstackbottom, oldstacktop);
   freepgdir(oldpgdir);

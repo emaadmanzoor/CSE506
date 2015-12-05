@@ -65,6 +65,7 @@ int outputpos;
 /* Source: http://stackoverflow.com/questions/2601121/mprotect-how-aligning-to-multiple-of-pagesize-works */
 #define ALIGNUP(x)  ((((uint64_t) x) + PGSIZE-1) & ~(PGSIZE-1))
 #define ALIGNDN(x)  (((uint64_t) x) & ~(PGSIZE-1))
+#define MAX_PHYS_PAGES 40000
 
 #define PML4_SHIFT 39
 #define PDPT_SHIFT 30
@@ -79,6 +80,7 @@ int outputpos;
 #define PTE_P           0x001   // Present
 #define PTE_W           0x002   // Writeable
 #define PTE_U           0x004   // User
+#define PTE_C           0x100   // COW (custom defined)
 
 // gdt.c
 #define KCODE           8     // byte offsets into the gdt
@@ -148,13 +150,18 @@ void clear_screen();
 void clear_current_line();
 
 // kmem.c
-void kfree_range(uint64_t vstart, uint64_t vend);
+uint8_t refcount[MAX_PHYS_PAGES];
+void meminit();
 void kfree(char *v);
 char *kalloc();
 int num_free_pages();
+void incref(uint64_t);
+void decref(uint64_t);
+uint8_t getref(uint64_t);
 
 // vm.c
 uint64_t physend; // last available physical address
+uint64_t kphysfree;
 pte_t* setupkvm();
 void create_mapping(pte_t* pml4, uint64_t va, uint64_t pa, uint32_t perm);
 void loadpgdir(pte_t*);
@@ -180,6 +187,7 @@ void memcpy(char *, char *, int);
 
 struct usercontext {
   // 4. pushed by the generic handler
+  uint64_t rbp;
   uint64_t r15;
   uint64_t r14;
   uint64_t r13;
@@ -225,6 +233,7 @@ int fork();
 void freepgdir(pte_t*);
 void copypgdir(pte_t*, pte_t*, uint64_t, uint64_t);
 void delete_pages(pte_t*, uint64_t, uint64_t);
+pte_t *get_mapping(pte_t*, uint64_t);
 int exec(char*, char**, char**);
 int getpid();
 int getppid();

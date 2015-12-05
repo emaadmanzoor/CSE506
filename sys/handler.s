@@ -21,6 +21,7 @@ handler:
   pushq %r13
   pushq %r14
   pushq %r15
+  pushq %rbp
 
   movq %rsp, %rdi
   callq interrupt_handler # interrupt_handler(struct trapframe* f)
@@ -28,6 +29,7 @@ handler:
 .global handler_restore
 .align 16
 handler_restore:
+  popq %rbp
   popq %r15
   popq %r14
   popq %r13

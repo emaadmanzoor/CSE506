@@ -4,12 +4,52 @@ struct pageframe {
   struct pageframe* next;
 };
 struct pageframe *freelist = NULL;
+// uint8_t refcount[MAX_PHYS_PAGES] is a global
 
-// free pages in range [vstart, vend)
-void kfree_range(uint64_t vstart, uint64_t vend) {
-  for (char *p = (char*) ALIGNUP(vstart);
-       p + PGSIZE < (char*) vend; p += PGSIZE)
+void meminit() {
+  int i;
+  char *p;
+
+  for (i = 0; i < MAX_PHYS_PAGES; i++) {
+    refcount[i] = 0;
+  }
+
+  for (p = (char*) ALIGNUP(P2V(kphysfree));
+       p + PGSIZE < (char*) P2V(physend); p += PGSIZE) {
     kfree(p);
+  }
+}
+
+uint8_t getref(uint64_t pa) {
+  // pa is page aligned
+  int byteoffset = pa - kphysfree;
+  int pagenumber = byteoffset / PGSIZE;
+  if ((pa & 0xfff) != 0 || pagenumber >= MAX_PHYS_PAGES) {
+    panic("refcount bug\n");
+  }
+  return refcount[pagenumber];
+}
+
+void incref(uint64_t pa) {
+  // pa is page aligned
+  int byteoffset = pa - kphysfree;
+  int pagenumber = byteoffset / PGSIZE;
+  if ((pa & 0xfff) != 0 || pagenumber >= MAX_PHYS_PAGES) {
+    panic("refcount bug\n");
+  }
+  refcount[pagenumber]++;
+  //printf("refcount of %x = %d\n", pa, refcount[pagenumber]);
+}
+
+void decref(uint64_t pa) {
+  // pa is page aligned
+  int byteoffset = pa - kphysfree;
+  int pagenumber = byteoffset / PGSIZE;
+  if ((pa & 0xfff) != 0 || pagenumber >= MAX_PHYS_PAGES) {
+    panic("refcount bug\n");
+  }
+  refcount[pagenumber]--;
+  //printf("refcount of %x = %d\n", pa, refcount[pagenumber]);
 }
 
 // v must be page-aligned
