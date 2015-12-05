@@ -26,7 +26,7 @@ struct proc {
   struct context *kcontext;     // swtch() here to run process
   int killed;                  // If non-zero, have been killed
   struct file files[MAX_FILE];
-  //struct inode *cwd;           // Current directory
+  char cwd[32];
   char name[32];               // Process name (debugging)
   uint64_t startva;
   uint64_t endva;

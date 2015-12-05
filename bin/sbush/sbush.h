@@ -14,5 +14,6 @@ extern char *ps1;
 void setenv(char *const args[], int argc);
 void getenv(char *const args[], int argc);
 void cd(char *const args[], int argc);
+void pwd(char *const args[], int argc);
 void runcmd(const char* cmd, char *const args[], int argc);
 void clear(void);
