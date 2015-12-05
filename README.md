@@ -32,4 +32,11 @@ Here are a set of binaries that be used to evaluate the features of our OS:
 ----------------
 Acknowledgements
 ----------------
-* Some design principles were inspired from the 32-bit open-source OS, xv6.
+* The following design principles were inspired from the Xv6 book (https://pdos.csail.mit.edu/6.828/2014/xv6/book-rev8.pdf).
+  These include:
+  * The kernel stack structure of the first process (kernel context and user context placed on the kernel stack)
+  * Context switching mechanism (swtch function)
+* User space memory allocation (malloc) implementation inspired from The C Programming Language by Kernighan & Ritchie
+* Interrupt Table (ints.s) based on the ideas from https://littleosbook.github.io/.
+* James Molloy's OS dev tutorial series: http://www.jamesmolloy.co.uk/tutorial_html/index.html
+* OS Dev wiki and forums (osdev.org)
