@@ -13,6 +13,7 @@ void *malloc(size_t size);
 void free(void *ptr);
 int brk(void *end_data_segment);
 void *sbrk(long inc);
+void memset(char*, char, int);
 
 // processes
 pid_t fork(void);
@@ -23,6 +24,7 @@ int execve(const char *filename, char *const argv[], char *const envp[]);
 pid_t waitpid(pid_t pid, int *status, int options);
 unsigned int sleep(unsigned int seconds);
 int ps();
+int ls(char *path);
 
 // signals
 typedef void (*sighandler_t)(int);

@@ -41,13 +41,16 @@ void syscall(struct usercontext *f) {
       f->rax = waitpid((int)f->rdi);
       break;
     case SYS_open:
-      f->rax = open((char*) f->rdi); // ignore flags
+      f->rax = open((char*) f->rdi, f->rsi);
       break;
     case SYS_close:
       f->rax = close(f->rdi);
       break;
     case SYS_ps:
       f->rax = ps();
+      break;
+    case SYS_ls:
+      f->rax = ls((char*)f->rdi);
       break;
    case SYS_kill:
       f->rax = kill((int)f->rdi);

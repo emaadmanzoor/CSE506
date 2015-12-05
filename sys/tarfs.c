@@ -101,3 +101,46 @@ void map_program_binary(char *path, struct proc* proc) {
 
   loadpgdir(kpgdir); // restore kernel page table
 }
+
+int ls(char *path) {
+  char *p; // points to an address in tarfs
+  char prefix[200];
+  struct posix_header_ustar* phu;
+  int i, size;
+
+  p = &_binary_tarfs_start;
+  while (p < &_binary_tarfs_end) {
+    phu = (struct posix_header_ustar*) p;
+
+    size = octtodec(atoi(phu->size));
+
+    // get the prefix of the name before the first slash
+    if (path[0] == '/' && path[1] == 0) { // root
+      if (strlen(phu->name) > 0)
+        printf("%s\n", phu->name);
+    } else {
+      strcpy(prefix, phu->name);
+      for (i = 0; i < strlen(prefix) && prefix[i] != '/'; i++);
+      if (i != strlen(prefix)) {
+        prefix[i+1] = 0;
+        if (strcmp(path, prefix) == 0) {
+          printf("%s\n", phu->name);
+        }
+      }
+    }
+
+    p += sizeof(struct posix_header_ustar);
+
+    if (size == 0) {
+      // p already points to the next header address
+      continue;
+    }
+
+    // the next file header will start at a 512-byte-aligned
+    // address, so align the size up to 512 bytes
+    size = ((size + BLKSIZE - 1)/BLKSIZE) * BLKSIZE;
+    p += size;
+  }
+
+  return 0;
+}

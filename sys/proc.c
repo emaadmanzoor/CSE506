@@ -51,10 +51,10 @@ struct proc *alloc_proc() {
   for (f = p->files; f < &p->files[MAX_FILE]; f++) {
     f->start_off = 0;
     f->curr_off = 0;
-    f->sz = 0;
+    f->sz = -1;
   }
 
-  memset(p->cwd, 0, sizeof(p->cwd));
+  strcpy(p->cwd, "bin/");
 
   return p;
 }
@@ -259,7 +259,6 @@ void freepgdir(pte_t* pgdir) {
 
 int exec(char* path, char* argv[], char* envp[]) {
   uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
-  int last_slash = 0;
   uint64_t phstartva, phendva, oldstartva, oldendva, oldstackbottom, oldstacktop;
   int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
@@ -423,16 +422,6 @@ int exec(char* path, char* argv[], char* envp[]) {
   }
   *((uint64_t*) p) = 0; // NULL pointer
 
-  // set the path
-  for (i = 0; i < strlen(path); i++) {
-    if (path[i] == '/') {
-      last_slash = i;
-    }
-  }
-  if (last_slash == 0)
-    last_slash = strlen(path);
-  strncpy(current_proc->cwd, path, last_slash + 1);
-
   oldpgdir = current_proc->pgdir;
   current_proc->pgdir = newpgdir;
   loadpgdir(current_proc->pgdir);
@@ -539,7 +528,7 @@ int expandstack() {
   return 1;
 }
 
-int open(char *path) {
+int open(char *path, int isdir) {
   int i;
   struct file *f;
   struct posix_header_ustar *phu = get_file(path);
@@ -548,9 +537,14 @@ int open(char *path) {
     return -1;
   }
 
+  if (isdir && (octtodec(atoi(phu->size)) != 0))
+      return -1;
+  if (!isdir && (octtodec(atoi(phu->size)) == 0))
+      return -1;
+
   for (i = 2; i < MAX_FILE; i++) {
     f = &current_proc->files[i];
-    if (f->sz == 0)
+    if (f->sz == -1)
       break;
   }
 
@@ -569,7 +563,7 @@ int close(int fd) {
   struct file *f = &current_proc->files[fd];
   f->start_off = 0;
   f->curr_off = 0;
-  f->sz = 0;
+  f->sz = -1;
   return 0;
 }
 
@@ -585,6 +579,8 @@ int ps(void) {
 }
 
 int chdir(char *path) {
+  if (open(path, 1) < 0)
+    return -1;
   strcpy(current_proc->cwd, path);
   return 0;
 }
