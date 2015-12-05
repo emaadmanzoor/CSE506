@@ -4,9 +4,6 @@
 #include <sys/proc.h>
 #define DPL3 0x60
 
-static uint32_t ticks;
-static uint32_t secs; // seconds since boot
-
 void pitintr() {
   int preempt = 0;
   ticks++;

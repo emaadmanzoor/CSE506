@@ -16,7 +16,6 @@ struct context *kcontext;
 struct proc* current_proc;
 extern void swtch( struct context **old, struct context *new );
 struct proc {
-  uint64_t sz;                     // Size of process memory (bytes)
   pte_t* pgdir;                // Page table
   char *kstack;                // Bottom of kernel stack for this process
   enum procstate state;        // Process state

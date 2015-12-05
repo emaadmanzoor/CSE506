@@ -61,5 +61,8 @@ void syscall(struct usercontext *f) {
    case SYS_getcwd:
       f->rax = getcwd((char*)f->rdi, f->rsi);
       break;
+   case SYS_nanosleep:
+     f->rax = sleep((int)f->rdi);
+     break;
   }
 }

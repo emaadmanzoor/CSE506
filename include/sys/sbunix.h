@@ -4,6 +4,8 @@
 #include <sys/defs.h>
 
 // Constants for the int.c
+__volatile__  uint32_t ticks;
+__volatile__  uint32_t secs; // seconds since boot
 char inputqueue[ 200 ];
 __volatile__ int inputpos;
 char outputqueue[ 200 ];
@@ -241,7 +243,7 @@ int ls(char *);
 int chdir(char *);
 int getcwd(char*, size_t);
 int kill(int);
-int sleep(int);
+unsigned int sleep(unsigned int);
 uint64_t growproc(uint64_t newvend);
 int expandstack();
 int open(char *path, int isdir);
