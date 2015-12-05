@@ -1,42 +1,43 @@
 ------------
 CockroachOS 
 ------------
-Group Members: Rachee Singh, Emaad Ahmed Manzoor
+
+*Preemptive OS, 70 points*
+
+Team:
+   * Rachee Singh (racsingh@cs.stonybrook.edu)
+   * Emaad Ahmed Manzoor (emanzoor@cs.stonybrook.edu)
 
 --------
 Features
 --------
-* 64-bit, 4 level paging
-* Preemption of user processes
-* Copy On Write 
-* Auto-growing stack
-* SEGV handling
-* Round robin shceduler
-* Binaries for execution: kill, sleep, ls, ps, echo 
-* Background processes with "&"
-* Ctrl+C for kill
-* Auto-scrolling terminal
 
--------
-Testing
--------
-Here are a set of binaries that be used to evaluate the features of our OS:
-* The ps command prints all running/runnable/sleeping processes in the system.
-* A binary named "infinite" that enters an infinite loop. This process can be started in the background with
-  "infinite &". The ps command would show that it is executing and it can be killed by calling "kill -9 <pid>"
-* Execution of the "infinite" binary can be used to test preemption. The process can
-  be placed in the background and can be killed using Ctrl-C (when in foreground).
-* "echo <string>" can be used for printing strings on the screen.
-* "sleep <seconds>" will block until <seconds> expire and then the shell prompt is returned.
+## Kernel
+   * Round-robin preemptive scheduling
+   * COW fork
+   * Auto-growing stack
+   * Graceful SEGV handling
+
+## Userspace
+
+   * Available binaries: `kill`, `sleep`, `ls`, `ps`, `echo`, `cat`, `infinite`, `tests`
+   * C standard library
+   * Execute background processes with `&`
+   * View running processes with `ps`
+   * Kill a foreground running process with `^C`
+   * Kill a background running process with `kill -9 <pid>`
+   * Sleep for `n` seconds with `sleep <n>`
+   * Run an infinite loop with `infinite` (useful to test `ps`, `kill` and `^C`)
+   * View files in the current directory with `ls`, change directory with `cd` (you can `ls`, but cannot `cd` to `/`!)
+   * Print a file to the screen with `cat <filepath>`
+   * Clear the screen with `clear`
+   * The terminal auto-scrolls!
 
 ----------------
 Acknowledgements
 ----------------
-* The following design principles were inspired from the Xv6 book (https://pdos.csail.mit.edu/6.828/2014/xv6/book-rev8.pdf).
-  These include:
-  * The kernel stack structure of the first process (kernel context and user context placed on the kernel stack)
-  * Context switching mechanism (swtch function)
-* User space memory allocation (malloc) implementation inspired from The C Programming Language by Kernighan & Ritchie
-* Interrupt Table (ints.s) based on the ideas from https://littleosbook.github.io/.
-* James Molloy's OS dev tutorial series: http://www.jamesmolloy.co.uk/tutorial_html/index.html
-* OS Dev wiki and forums (osdev.org)
+
+   * The mechanism of setting up the first process stack was adopted from [xv6](https://pdos.csail.mit.edu/6.828/2014/xv6/book-rev8.pdf)(commentary on a 32-bit open-source OS).
+   * User space `malloc` is based on the implementation in K&R's C Programming Language.
+   * The interrupt handling mechanism (offloading to a generic handler) is based on the ideas from https://littleosbook.github.io/.
+   * Referred standard resources have been cited inline with the code.
