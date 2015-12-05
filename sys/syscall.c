@@ -50,6 +50,13 @@ void syscall(struct usercontext *f) {
       f->rax = ps();
       break;
    case SYS_kill:
-     f->rax = kill((int)f->rdi);
+      f->rax = kill((int)f->rdi);
+      break;
+   case SYS_chdir:
+      f->rax = chdir((char*)f->rdi);
+      break;
+   case SYS_getcwd:
+      f->rax = getcwd((char*)f->rdi, f->rsi);
+      break;
   }
 }

@@ -54,6 +54,8 @@ struct proc *alloc_proc() {
     f->sz = 0;
   }
 
+  memset(p->cwd, 0, sizeof(p->cwd));
+
   return p;
 }
 
@@ -175,6 +177,7 @@ int fork() {
   p->stackbottom = current_proc->stackbottom;
   p->stacktop = current_proc->stacktop;
   strcpy( p->name, "fork-child" );
+  strcpy(p->cwd, current_proc->cwd);
   /*
    * IMPORTANT: want to execute the child process at the exact same place as the parent
    * so copy all the user context (includes rip)
@@ -240,6 +243,7 @@ void freepgdir(pte_t* pgdir) {
 
 int exec(char* path, char* argv[], char* envp[]) {
   uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
+  int last_slash = 0;
   uint64_t phstartva, phendva, oldstartva, oldendva, oldstackbottom, oldstacktop;
   int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
@@ -399,6 +403,16 @@ int exec(char* path, char* argv[], char* envp[]) {
   }
   *((uint64_t*) p) = 0; // NULL pointer
 
+  // set the path
+  for (i = 0; i < strlen(path); i++) {
+    if (path[i] == '/') {
+      last_slash = i;
+    }
+  }
+  if (last_slash == 0)
+    last_slash = strlen(path);
+  strncpy(current_proc->cwd, path, last_slash + 1);
+
   oldpgdir = current_proc->pgdir;
   current_proc->pgdir = newpgdir;
   loadpgdir(current_proc->pgdir);
@@ -548,5 +562,17 @@ int ps(void) {
     if ( p->state != UNUSED && p->state != ZOMBIE )
       printf("%d       %s\n", p->pid, p->name, p->state );
   }
+  return 0;
+}
+
+int chdir(char *path) {
+  strcpy(current_proc->cwd, path);
+  return 0;
+}
+
+int getcwd(char *buf, size_t size) {
+  if (strlen(current_proc->cwd) + 1 > size)
+    return -1;
+  strcpy(buf, current_proc->cwd);
   return 0;
 }

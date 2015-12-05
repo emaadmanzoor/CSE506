@@ -228,6 +228,8 @@ int getpid();
 int getppid();
 int waitpid(int);
 int ps();
+int chdir(char *);
+int getcwd(char*, size_t);
 int kill(int);
 int sleep(int);
 uint64_t growproc(uint64_t newvend);

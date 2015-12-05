@@ -184,6 +184,9 @@ int main() {
     } else if (strcmp(cmd, "cd") == 0) {
       cd(args, argc);
       continue;
+    } else if (strcmp(cmd, "pwd") == 0) {
+      pwd(args, argc);
+      continue;
     } else if (strcmp(cmd, "clear") == 0) {
       clear();
       continue;
