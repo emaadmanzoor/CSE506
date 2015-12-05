@@ -575,6 +575,11 @@ int getcwd(char *buf, size_t size) {
   return 0;
 }
 
-int sleep(int t) {
+unsigned int sleep(unsigned int t) {
+  int timeuntil;
+  timeuntil = secs + t;
+  while (secs < timeuntil) {
+    yield();
+  }
   return 0;
 }

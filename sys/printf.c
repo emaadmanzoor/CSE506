@@ -131,9 +131,7 @@ void putint( uint64_t intgr, int base ) {
 void printf( const char *str, ... ) {
   int i, j, num_args = 0;
   int formatted = 0;
-  //unsigned int *arg_ptr;
   int intgr;
-  //uint64_t ptr;
   va_list valist;
   char* str_buf;
 
