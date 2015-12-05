@@ -239,13 +239,14 @@ int getpid();
 int getppid();
 int waitpid(int);
 int ps();
+int ls(char *);
 int chdir(char *);
 int getcwd(char*, size_t);
 int kill(int);
 unsigned int sleep(unsigned int);
 uint64_t growproc(uint64_t newvend);
 int expandstack();
-int open(char *path);
+int open(char *path, int isdir);
 int close(int fd);
 // global kernel page tables
 pte_t* kpgdir;

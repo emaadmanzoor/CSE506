@@ -25,4 +25,5 @@
 #define SYS_kill       62
 #define SYS_yield       4
 #define SYS_ps        111
+#define SYS_ls        112
 #endif

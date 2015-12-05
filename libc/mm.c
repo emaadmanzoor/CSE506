@@ -114,3 +114,12 @@ void free(void *a) {
   // 3. update the freelist pointer so freelist->next = new block
   freelist = prev;
 }
+
+void memset(char *b, char c, int len) {
+  char *p = b;
+  while (len > 0) {
+    *p = c;
+    p++;
+    len--;
+  }
+}

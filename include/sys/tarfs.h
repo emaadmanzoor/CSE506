@@ -75,7 +75,7 @@ struct progheader {
 struct file {
   char *start_off; // address in tarfs
   char *curr_off; // address in tarfs
-  uint64_t sz; // start_off + sz = max address of this file
+  int sz; // start_off + sz = max address of this file
 };
 
 struct posix_header_ustar *get_file(char *path);
