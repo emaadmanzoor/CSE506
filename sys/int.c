@@ -48,9 +48,11 @@ void kbdintr() {
     c = key_map[ (unsigned char) keycode ];
   }
   if (c == '\b') {
-    inputpos--;
-    inputqueue[inputpos] = 0;
-    printf( "%c", c );
+    if (inputpos != 0) {
+      inputpos--;
+      inputqueue[inputpos] = 0;
+      printf( "%c", c );
+    }
   } else {
     printf( "%c", c);
     //printf( "%d", inputpos);
