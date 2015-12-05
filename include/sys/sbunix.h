@@ -185,6 +185,7 @@ void memcpy(char *, char *, int);
 
 struct usercontext {
   // 4. pushed by the generic handler
+  uint64_t rbp;
   uint64_t r15;
   uint64_t r14;
   uint64_t r13;
