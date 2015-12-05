@@ -13,9 +13,13 @@ void runcmd(const char* cmd, char *const args[], int argc) {
   char *envp[1] = { NULL };
   char cwd[32] = {0};
 
+  //printf("calling execve for cmd %s\n", cmd);
+
   // first try running the command as is, in case
   // it is present in the current working directory
-  //printf("calling execve for cmd %s\n", cmd);
+  execve(cmd, args, envp);
+
+  // try appending the cwd
   getcwd(cwd, 32);
   if (strlen(cwd) > 0 && cwd[strlen(cwd) - 1] != '/')
     cwd[strlen(cwd) - 1] = '/';
@@ -27,7 +31,7 @@ void runcmd(const char* cmd, char *const args[], int argc) {
   // then search on the PATH
   path_len = strlen(path);
   if (path_len == 0) {
-    printf("Bad command or filename: check existence or +x permission\n");
+    printf("Bad command or filename.\n");
     return;
   }
 
@@ -73,5 +77,5 @@ void runcmd(const char* cmd, char *const args[], int argc) {
 
   // failure
   free(search_path);
-  printf("Bad command or filename: check existence or +x permission\n");
+  printf("Bad command or filename.\n");
 }
