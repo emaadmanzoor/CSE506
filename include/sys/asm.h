@@ -64,4 +64,10 @@ static __inline uint64_t rcr2()
   __asm__ __volatile__("movq %%cr2, %0" : "=r" (address));
   return address;
 }
+static __inline uint64_t rcs()
+{
+  uint64_t address;
+  __asm__ __volatile__("movq %%cs, %0": "=r" (address));
+  return address;
+}
 #endif

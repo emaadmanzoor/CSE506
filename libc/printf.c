@@ -19,15 +19,15 @@ int printf(const char *format, ...) {
     } else {
       if ( format[ i ] == 'd' ) {
 	intgr = (long) va_arg( val, int );
-	return __syscall(SYS_write, 1, format, intgr );
+	return __syscall(SYS_fwrite, 1, format, intgr );
       } else if ( format[ i ] == 's' ) {
 	str_buf = va_arg( val, char* );
-	return __syscall(SYS_write, 1, format, str_buf);
+	return __syscall(SYS_fwrite, 1, format, str_buf);
       } else if ( format[ i ] == 'c' ) {
 	c = va_arg( val, int );
-	return __syscall(SYS_write, 1, format, c);
+	return __syscall(SYS_fwrite, 1, format, c);
       }
     }
   }
-  return 0;
+  return __syscall(SYS_fwrite, 1, format, 0);
 }

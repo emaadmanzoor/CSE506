@@ -70,13 +70,13 @@ void putchar( char c ) {
   location = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + x_pos );
 
   if ( c == '\n' ) {
+    x_pos = 0;
+    y_pos++;
+    scroll();
     // clear the characters in this line, ahead of the x_pos (prevents remnanats of the
     // previous line)
     for (i = x_pos; i<85; i++)
       *((uint16_t*)VIDEO_MEM_ADDR + (display_width*y_pos + i)) = 0x20;
-    x_pos = 0;
-    y_pos++;
-    scroll();    
   } else if( c == 0x08 ) {
     // blank space
     if (x_pos != 0) {
@@ -95,12 +95,22 @@ void putchar( char c ) {
   if ( x_pos > 80 ) {
     x_pos = 0;
     y_pos++;
+    clear_current_line();
   }
   move_cursor();
 }
 
-void putint( int intgr, int base ) {
-  char digits_space[] = "0123456789ABCDEF";
+void clear_current_line() {
+  int i;
+  uint16_t *loc;
+  for(i = 0; i<display_width; i++) {
+    loc = (uint16_t*) VIDEO_MEM_ADDR + ( display_width *  y_pos + i );
+    *loc = ' ';
+  }
+}
+
+void putint( uint64_t intgr, int base ) {
+  char digits_space[] = "0123456789abcdef";
   int num_digits = 0;
   char intbuf[ 26 ];
 
@@ -153,7 +163,7 @@ void printf( const char *str, ... ) {
         putchar( va_arg( valist, int ) );
 	formatted = 0;
       } else if ( str[ i ] == 'x' || str[ i ] == 'p' ) {
-	intgr = (long) va_arg( valist, int );
+	intgr = va_arg( valist, uint64_t);
 	putint( intgr, 16 );
 	formatted = 0;
       } else if ( str[ i ] == 's' ) {

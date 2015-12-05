@@ -134,6 +134,7 @@ int main() {
   strcpy(ps1, DEFAULT_PS1);
 
   while ( 1 ) {
+    background = 0;
     // initialise command/arg data structures
     for ( i = 0; i< MAX_BUF_SIZE; i++ )
       buf[ i ] = 0;
@@ -145,7 +146,7 @@ int main() {
     printf(ps1);
     printf(">");
 
-    gets( buf, MAX_BUF_SIZE );
+    read( 0, buf, MAX_BUF_SIZE );
     if( buf[ 0 ] == 0 )
       continue;
 
@@ -182,6 +183,9 @@ int main() {
       continue;
     } else if (strcmp(cmd, "cd") == 0) {
       cd(args, argc);
+      continue;
+    } else if (strcmp(cmd, "pwd") == 0) {
+      pwd(args, argc);
       continue;
     } else if (strcmp(cmd, "clear") == 0) {
       clear();

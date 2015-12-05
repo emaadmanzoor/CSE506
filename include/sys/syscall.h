@@ -15,6 +15,7 @@
 #define SYS_open        2
 #define SYS_read        0
 #define SYS_write       1
+#define SYS_fwrite     10
 #define SYS_lseek       8
 #define SYS_close       3
 #define SYS_pipe       22
@@ -23,5 +24,5 @@
 #define SYS_getdents   78
 #define SYS_kill       62
 #define SYS_yield       4
-
+#define SYS_ps        111
 #endif

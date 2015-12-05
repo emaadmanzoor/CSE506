@@ -17,6 +17,7 @@ extern void handler_restore();
 struct proc *alloc_proc() {
   int found = 0;
   struct proc *p;
+  struct file *f;
   char *sp;
 
   for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
@@ -47,6 +48,14 @@ struct proc *alloc_proc() {
   p->kcontext = (struct context *) sp;
   p->kcontext->rip = (uint64_t) &handler_restore;
 
+  for (f = p->files; f < &p->files[MAX_FILE]; f++) {
+    f->start_off = 0;
+    f->curr_off = 0;
+    f->sz = 0;
+  }
+
+  memset(p->cwd, 0, sizeof(p->cwd));
+
   return p;
 }
 
@@ -55,6 +64,8 @@ void init_user_process(char *path) {
   char *envp[1] = {NULL};
   current_proc = alloc_proc(); // allocate kstack and place in ptable
   current_proc->pgdir = NULL; // allocated by exec
+  strcpy( current_proc->name, "init" );
+  current_proc->state = RUNNABLE;
   current_proc->ucontext->cs = UCODE | RPL_U;
   current_proc->ucontext->ss = UDATA | RPL_U;
   current_proc->ucontext->rflags = IF;
@@ -75,7 +86,7 @@ void scheduler() {
       current_proc = p;
       //free_pages = num_free_pages();
       //printf( "Scheduler, free pages: %d\n", free_pages );
-      printf( "Scheduler, pid: %d\n", current_proc->pid);
+      //printf( "Scheduler, pid: %d\n", current_proc->pid);
       swtch( &kcontext, p->kcontext );
       // Back in the kernel after executing the process
       // Don't think we need to switch to kernel's page tables since the process has
@@ -173,6 +184,8 @@ int fork() {
   p->endva = current_proc->endva;
   p->stackbottom = current_proc->stackbottom;
   p->stacktop = current_proc->stacktop;
+  strcpy( p->name, "fork-child" );
+  strcpy(p->cwd, current_proc->cwd);
   /*
    * IMPORTANT: want to execute the child process at the exact same place as the parent
    * so copy all the user context (includes rip)
@@ -242,6 +255,7 @@ void freepgdir(pte_t* pgdir) {
 
 int exec(char* path, char* argv[], char* envp[]) {
   uint64_t i, p, argc = 0, envc = 0, va = -1, pa, sp, sp2, pageoff, copyoff = 0;
+  int last_slash = 0;
   uint64_t phstartva, phendva, oldstartva, oldendva, oldstackbottom, oldstacktop;
   int len, size, argvsize = 0, envpsize = 0;
   struct elfheader *eh;
@@ -251,17 +265,21 @@ int exec(char* path, char* argv[], char* envp[]) {
   // map the binary into the new process page table
   // (this duplicates map_program_binary becase we need
   // to modify the stack of the new process)
-  newpgdir = setupkvm();
   eh = get_elf_header(path);
+  if (eh == NULL) { // file not found
+    return -1;
+  }
+
   ph = (struct progheader *)((uint64_t)(eh) + eh->phoff);
   current_proc->ucontext->rip = eh->entry;
-
+  strcpy(current_proc->name, path);
   // save these to free their pages later
   oldstartva = current_proc->startva;
   oldendva = current_proc->endva;
   oldstackbottom = current_proc->stackbottom;
   oldstacktop = current_proc->stacktop;
 
+  newpgdir = setupkvm();
   current_proc->startva = -1;  // 0x000 unsigned min
   current_proc->endva = 0;   // 0xfff unsigned max
   for (i = 0; i < eh->phnum; i++, ph++) {
@@ -397,6 +415,16 @@ int exec(char* path, char* argv[], char* envp[]) {
   }
   *((uint64_t*) p) = 0; // NULL pointer
 
+  // set the path
+  for (i = 0; i < strlen(path); i++) {
+    if (path[i] == '/') {
+      last_slash = i;
+    }
+  }
+  if (last_slash == 0)
+    last_slash = strlen(path);
+  strncpy(current_proc->cwd, path, last_slash + 1);
+
   oldpgdir = current_proc->pgdir;
   current_proc->pgdir = newpgdir;
   loadpgdir(current_proc->pgdir);
@@ -408,6 +436,52 @@ int exec(char* path, char* argv[], char* envp[]) {
   delete_pages(oldpgdir, oldstackbottom, oldstacktop);
   freepgdir(oldpgdir);
 
+  return 0;
+}
+
+int getpid() {
+  return current_proc->pid;
+}
+
+int getppid() {
+  if (current_proc->pid == 1 ) {
+    return 0;
+  }
+  return current_proc->parent->pid;
+}
+
+int waitpid( int pid ) {
+  struct proc* p;
+  while( 1 ) {
+    for( p=ptable.proc; p < &ptable.proc[MAX_PROC]; p++ ) {
+      if ( p->pid == pid ) {
+	if( p->state == ZOMBIE ) {
+	  p->parent = 0;
+	  p->pid = 0;
+	  p->killed = 0;
+	  p->kstack = 0;
+	  return pid;
+	}
+      }
+    }
+    yield();
+  }
+  return -1;
+}
+
+int kill(int pid) {
+  struct proc* p;
+  for( p=ptable.proc; p < &ptable.proc[MAX_PROC]; p++ ) {
+    if (p->pid == pid) {
+      p->killed = 1;
+      return 0;
+    }
+  }
+  return -1;
+}
+
+int sleep(int pid) {
+  // TODO
   return 0;
 }
 
@@ -456,4 +530,61 @@ int expandstack() {
                  V2P(pa), PTE_W | PTE_U);
   current_proc->stackbottom -= PGSIZE;
   return 1;
+}
+
+int open(char *path) {
+  int i;
+  struct file *f;
+  struct posix_header_ustar *phu = get_file(path);
+
+  if (phu == NULL) {
+    return -1;
+  }
+
+  for (i = 2; i < MAX_FILE; i++) {
+    f = &current_proc->files[i];
+    if (f->sz == 0)
+      break;
+  }
+
+  if (i == MAX_FILE) {
+    return -1;
+  }
+
+  f->start_off = (char*) phu + sizeof(struct posix_header_ustar);
+  f->curr_off = f->start_off;
+  f->sz = octtodec(atoi(phu->size));
+
+  return i;
+}
+
+int close(int fd) {
+  struct file *f = &current_proc->files[fd];
+  f->start_off = 0;
+  f->curr_off = 0;
+  f->sz = 0;
+  return 0;
+}
+
+int ps(void) {
+  struct proc* p;
+  printf( "Process table:\n" );
+  printf("PID      Name\n");
+  for(p = ptable.proc; p < &ptable.proc[MAX_PROC]; p++) {
+    if ( p->state != UNUSED && p->state != ZOMBIE )
+      printf("%d       %s\n", p->pid, p->name, p->state );
+  }
+  return 0;
+}
+
+int chdir(char *path) {
+  strcpy(current_proc->cwd, path);
+  return 0;
+}
+
+int getcwd(char *buf, size_t size) {
+  if (strlen(current_proc->cwd) + 1 > size)
+    return -1;
+  strcpy(buf, current_proc->cwd);
+  return 0;
 }

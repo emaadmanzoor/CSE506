@@ -33,6 +33,8 @@ int outputpos;
 
 // proc.c constants
 #define MAX_PROC 64
+#define MAX_FILE 64
+#define KSTACKSIZE 4096
 
 /* Source: FreeBSD
  * Frequency of all three count-down timers; (TIMER_FREQ/freq) is the
@@ -141,7 +143,9 @@ void eoi(int irq);
 // print.c
 void printf( const char *fmt, ...);
 void printat( int x, int y, int type, int val );
+void putchar(char);
 void clear_screen();
+void clear_current_line();
 
 // kmem.c
 uint8_t refcount[MAX_PHYS_PAGES];
@@ -213,7 +217,8 @@ struct usercontext {
 
 void syscall(struct usercontext *);
 int read( int, char*, int );
-int write( int, char*, uint64_t);
+int write( int, char*, int);
+int fwrite( int, char*, uint64_t);
 
 // proc.c
 struct proc* alloc_proc();
@@ -227,8 +232,18 @@ void copypgdir(pte_t*, pte_t*, uint64_t, uint64_t);
 void delete_pages(pte_t*, uint64_t, uint64_t);
 pte_t *get_mapping(pte_t*, uint64_t);
 int exec(char*, char**, char**);
+int getpid();
+int getppid();
+int waitpid(int);
+int ps();
+int chdir(char *);
+int getcwd(char*, size_t);
+int kill(int);
+int sleep(int);
 uint64_t growproc(uint64_t newvend);
 int expandstack();
+int open(char *path);
+int close(int fd);
 // global kernel page tables
 pte_t* kpgdir;
 #endif
