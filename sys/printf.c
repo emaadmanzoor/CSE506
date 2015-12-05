@@ -91,9 +91,10 @@ void putchar( char c ) {
   /*
    * Reached end of line, begin from the next
    */
-  if ( x_pos > 80 ) {
+  if ( x_pos >= 80 ) {
     x_pos = 0;
     y_pos++;
+    scroll();
     clear_current_line();
   }
   move_cursor();
