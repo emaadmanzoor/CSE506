@@ -93,6 +93,7 @@ void scheduler() {
       // kernel mappings.
       loadpgdir(kpgdir);
       if (current_proc->killed) {
+        //printf("process killed\n");
         delete_pages(current_proc->pgdir, current_proc->startva, current_proc->endva);
         delete_pages(current_proc->pgdir, current_proc->stackbottom, current_proc->stacktop);
         freepgdir(current_proc->pgdir);
@@ -172,6 +173,7 @@ void copypgdir(pte_t *destpgdir, pte_t* srcpgdir,
 
 int fork() {
   struct proc* p;
+  //printf("forking\n");
   // deep copy the current process's page tables
   p = alloc_proc();
   p->pgdir = setupkvm();
@@ -179,6 +181,8 @@ int fork() {
             current_proc->startva, current_proc->endva);
   copypgdir(p->pgdir, current_proc->pgdir,
             current_proc->stackbottom, current_proc->stacktop);
+  // refresh the tlb
+  loadpgdir(current_proc->pgdir);
   p->parent = current_proc;
   p->startva = current_proc->startva;
   p->endva = current_proc->endva;
@@ -262,6 +266,8 @@ int exec(char* path, char* argv[], char* envp[]) {
   struct progheader *ph;
   pte_t *oldpgdir, *newpgdir;
 
+  //printf("exec'ing\n");
+
   // map the binary into the new process page table
   // (this duplicates map_program_binary becase we need
   // to modify the stack of the new process)
@@ -282,6 +288,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   newpgdir = setupkvm();
   current_proc->startva = -1;  // 0x000 unsigned min
   current_proc->endva = 0;   // 0xfff unsigned max
+  //printf("creating code mappings\n");
   for (i = 0; i < eh->phnum; i++, ph++) {
     // iteration for each program header in the ELF
     // each ELF contains a TEXT and DATA segment
@@ -323,6 +330,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   // The stack address at this point is unmapped; however,
   // on a stack push, the pointer is FIRST decremented and
   // then written to, so it's fine.
+  //printf("creating stack mappings\n");
   pa = V2P(kalloc());
   create_mapping(newpgdir, KERNBASE - PGSIZE, pa, PTE_W | PTE_U);
   sp = P2V(pa) + PGSIZE; // this is a va in the current pagedir
@@ -432,6 +440,7 @@ int exec(char* path, char* argv[], char* envp[]) {
   if (oldpgdir == NULL) // first process
     return 0;
 
+  //printf("deleting old mappings\n");
   delete_pages(oldpgdir, oldstartva, oldendva);
   delete_pages(oldpgdir, oldstackbottom, oldstacktop);
   freepgdir(oldpgdir);
